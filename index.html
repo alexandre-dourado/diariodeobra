@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SITE LOG PRO - Diário de Obra</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#00696f", "tertiary-container": "#00f0fc", "secondary-fixed": "#e2e2e2", "surface-container-lowest": "#ffffff",
+              "secondary": "#5e5e5e", "primary-fixed": "#ffe170", "surface-container-high": "#ebe7e7", "error": "#ba1a1a",
+              "primary": "#705d00", "on-secondary": "#ffffff", "on-tertiary": "#ffffff", "on-secondary-fixed": "#1b1b1b",
+              "surface-container-highest": "#e5e2e1", "on-primary": "#ffffff", "outline-variant": "#d0c6ab", "on-error": "#ffffff",
+              "surface-bright": "#fcf9f8", "on-tertiary-fixed-variant": "#004f53", "inverse-primary": "#e9c400", "on-secondary-container": "#646464",
+              "surface-tint": "#705d00", "surface-variant": "#e5e2e1", "surface-dim": "#dcd9d9", "tertiary-fixed": "#70f6ff",
+              "on-background": "#1c1b1b", "tertiary-fixed-dim": "#00dce7", "on-error-container": "#93000a", "surface-container": "#f0edec",
+              "inverse-surface": "#313030", "secondary-fixed-dim": "#c6c6c6", "on-primary-container": "#705d00", "on-surface-variant": "#4d4632",
+              "on-primary-fixed-variant": "#544600", "inverse-on-surface": "#f3f0ef", "surface-container-low": "#f6f3f2", "surface": "#fcf9f8",
+              "primary-fixed-dim": "#e9c400", "outline": "#7f775f", "on-surface": "#1c1b1b", "secondary-container": "#e2e2e2",
+              "on-primary-fixed": "#221b00", "background": "#fcf9f8", "on-tertiary-container": "#00696f", "on-tertiary-fixed": "#002022",
+              "on-secondary-fixed-variant": "#474747", "primary-container": "#ffd600", "error-container": "#ffdad6"
+            },
+            borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+            fontFamily: { "headline": ["Space Grotesk"], "body": ["Public Sans"], "label": ["Public Sans"] }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      body { min-height: max(884px, 100dvh); }
+      .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 24; }
+      
+      .hazard-pattern {
+        background-color: #ffd600;
+        background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, #705d00 20px, #705d00 40px);
+        opacity: 0.1;
+      }
+      .hazard-bg {
+        background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(112, 93, 0, 0.05) 10px, rgba(112, 93, 0, 0.05) 20px);
+      }
+      .hazard-texture {
+        background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(112, 93, 0, 0.05) 10px, rgba(112, 93, 0, 0.05) 20px);
+      }
+      .noise-overlay {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        opacity: 0.05;
+      }
+      
+      /* CLASSE MÁGICA PARA O SPA FUNCIONAR */
+      .hidden-view { display: none !important; }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col pb-32">
+
+    <div id="view-home" class="view-container">
+        <header class="bg-[#fcf9f8] dark:bg-stone-950 flex items-center w-full px-6 h-16 max-w-none docked full-width top-0 sticky z-40">
+            <div class="flex items-center gap-4 w-full">
+                <button class="material-symbols-outlined text-[#705d00] dark:text-[#ffd600] active:scale-95 transition-transform duration-100 p-2 hover:bg-[#e5e2e1] dark:hover:bg-stone-800 rounded">arrow_back</button>
+                <h1 class="text-xl font-black uppercase tracking-tighter text-stone-900 dark:text-stone-50 font-['Space_Grotesk']">SITE LOG PRO</h1>
+                <div class="ml-auto flex items-center">
+                    <span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-lg font-headline font-bold text-sm tracking-tight">LIVE FEED</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="px-6 py-8 space-y-8 max-w-5xl mx-auto">
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-surface-container-high p-6 flex flex-col justify-between aspect-video md:aspect-auto">
+                    <span class="font-label font-bold text-xs uppercase tracking-widest text-secondary">Active Sites</span>
+                    <div class="font-headline font-black text-6xl text-on-background">08</div>
+                </div>
+                <div class="bg-primary-container p-6 flex flex-col justify-between aspect-video md:aspect-auto relative overflow-hidden">
+                    <div class="hazard-bg absolute inset-0"></div>
+                    <span class="font-label font-bold text-xs uppercase tracking-widest text-on-primary-container relative z-10">Pending Logs</span>
+                    <div class="font-headline font-black text-6xl text-on-primary-container relative z-10">03</div>
+                </div>
+                <div class="bg-surface-container-high p-6 flex flex-col justify-between aspect-video md:aspect-auto">
+                    <span class="font-label font-bold text-xs uppercase tracking-widest text-secondary">Personnel On-Site</span>
+                    <div class="font-headline font-black text-6xl text-on-background">142</div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div onclick="iniciarRegistro('SP-9022', 'Residencial Aurora')" class="group relative bg-surface-container-low flex flex-col h-auto min-h-[320px] active:scale-[0.98] transition-all cursor-pointer overflow-hidden border-b-8 border-primary-container">
+                    <div class="h-48 w-full relative bg-stone-300">
+                        <div class="absolute top-4 right-4 bg-tertiary text-on-tertiary px-3 py-1 font-headline font-bold text-xs uppercase tracking-tighter">In Progress</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="mb-4">
+                            <span class="text-xs font-bold text-primary uppercase tracking-widest block mb-1">ID: #SP-9022</span>
+                            <h2 class="font-headline font-black text-2xl uppercase leading-none text-on-background">Residencial Aurora</h2>
+                        </div>
+                    </div>
+                </div>
+                <div onclick="iniciarRegistro('RJ-4410', 'Complexo Logístico Norte')" class="group relative bg-surface-container-low flex flex-col h-auto min-h-[320px] active:scale-[0.98] transition-all cursor-pointer overflow-hidden border-b-8 border-primary-container">
+                    <div class="h-48 w-full relative bg-stone-400">
+                        <div class="absolute top-4 right-4 bg-error text-on-error px-3 py-1 font-headline font-bold text-xs uppercase tracking-tighter">Pending Log</div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="mb-4">
+                            <span class="text-xs font-bold text-primary uppercase tracking-widest block mb-1">ID: #RJ-4410</span>
+                            <h2 class="font-headline font-black text-2xl uppercase leading-none text-on-background">Complexo Logístico Norte</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="fixed bottom-20 left-0 w-full px-6 py-4 bg-surface/80 backdrop-blur-md z-40 md:hidden">
+            <button onclick="iniciarRegistro('ID_GERAL', 'Obra Geral')" class="w-full bg-primary-container text-on-primary-container h-16 font-headline font-black text-lg uppercase tracking-widest flex items-center justify-center gap-4 border-b-4 border-on-primary-container active:translate-y-1 transition-all">
+                <span class="material-symbols-outlined">edit_note</span> REGISTRAR HOJE
+            </button>
+        </div>
+    </div>
+
+    <div id="view-step1" class="view-container hidden-view">
+        <header class="bg-[#fcf9f8] dark:bg-stone-950 flex items-center w-full px-6 h-16 max-w-none sticky top-0 z-50">
+            <button onclick="goToView('view-home')" class="active:scale-95 transition-transform duration-100 p-2 rounded-full hover:bg-[#e5e2e1] dark:hover:bg-stone-800">
+                <span class="material-symbols-outlined text-[#705d00] dark:text-[#ffd600]">arrow_back</span>
+            </button>
+            <span class="font-['Space_Grotesk'] font-bold tracking-tight text-xl font-black uppercase tracking-tighter text-stone-900 ml-4">SITE LOG PRO</span>
+        </header>
+
+        <main class="flex-grow flex flex-col px-6 pt-8 pb-32 max-w-2xl mx-auto w-full">
+            <div class="mb-10">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="font-headline font-bold text-sm tracking-widest uppercase text-on-surface-variant">Step 1 of 5</span>
+                    <span class="font-headline font-black text-3xl text-primary">20%</span>
+                </div>
+                <div class="h-4 bg-surface-container-highest w-full overflow-hidden">
+                    <div class="h-full bg-primary-container w-1/5"></div>
+                </div>
+            </div>
+
+            <div class="mb-12">
+                <h1 class="font-headline font-extrabold text-5xl leading-tight tracking-tight text-on-surface mb-4">PASSO 1: FOTO DA OBRA</h1>
+                <div class="h-2 w-24 bg-primary-container"></div>
+            </div>
+
+            <div class="flex-grow flex flex-col gap-6">
+                <div class="relative group aspect-[4/3] w-full bg-surface-container-low flex flex-col items-center justify-center text-center overflow-hidden">
+                    <div class="absolute inset-0 hazard-pattern pointer-events-none"></div>
+                    <img id="preview-foto" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="Preview" />
+                    <div id="placeholder-foto" class="z-10 px-8">
+                        <span class="material-symbols-outlined text-8xl text-outline-variant mb-6" style="font-variation-settings: 'wght' 200;">photo_camera</span>
+                        <p class="font-headline font-bold text-xl text-on-surface-variant uppercase tracking-tight">Nenhuma imagem capturada</p>
+                    </div>
+                </div>
+
+                <button id="btn-camera" class="bg-primary-container text-on-primary-container font-headline font-black text-2xl py-8 px-6 flex items-center justify-center gap-4 active:scale-[0.98] transition-all duration-200 shadow-[8px_8px_0px_0px_#705d00]">
+                    <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">add_a_photo</span> ABRIR CÂMERA
+                </button>
+                
+                <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+            </div>
+        </main>
+
+        <div class="fixed bottom-20 left-0 w-full px-6 py-4 bg-surface/90 backdrop-blur-md z-40">
+            <button id="btn-next-step1" onclick="goToView('view-step2')" class="w-full bg-primary text-on-primary font-headline font-black text-xl py-5 active:scale-[0.98] transition-all" disabled style="opacity: 0.5;">
+                PRÓXIMA ETAPA
+            </button>
+        </div>
+    </div>
+
+    <div id="view-step2" class="view-container hidden-view">
+        <header class="bg-[#fcf9f8] dark:bg-stone-950 flex items-center w-full px-6 h-16 max-w-none sticky top-0 z-40">
+            <button onclick="goToView('view-step1')" class="text-[#705d00] dark:text-[#ffd600] active:scale-95 p-2 rounded">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="text-xl font-black uppercase tracking-tighter text-stone-900 ml-4 font-['Space_Grotesk']">SITE LOG PRO</h1>
+        </header>
+
+        <main class="flex-grow container mx-auto px-6 py-8 max-w-2xl">
+            <div class="mb-10">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="font-headline font-bold text-primary tracking-tight text-sm uppercase">Progresso da Obra</span>
+                    <span class="font-headline font-black text-2xl text-on-surface">02 <span class="text-secondary font-light text-base">/ 05</span></span>
+                </div>
+                <div class="h-3 bg-surface-container-highest rounded-none flex overflow-hidden">
+                    <div class="w-2/5 bg-primary-container h-full relative"></div>
+                </div>
+            </div>
+
+            <div class="mb-12">
+                <h2 class="font-headline font-black text-5xl md:text-6xl text-on-surface leading-none tracking-tighter mb-4 uppercase">PASSO 2: <br/>ATIVIDADE</h2>
+                <div class="w-16 h-2 bg-primary"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4" id="grid-atividades">
+                <button onclick="selecionarAtividade('Concretagem', this)" class="btn-atividade flex flex-col items-start justify-between p-6 aspect-square bg-surface-container-highest text-on-surface hover:bg-surface-dim transition-all duration-200">
+                    <span class="material-symbols-outlined text-4xl">foundation</span>
+                    <span class="font-headline font-bold text-xl uppercase tracking-tight">Concretagem</span>
+                </button>
+                <button onclick="selecionarAtividade('Alvenaria', this)" class="btn-atividade flex flex-col items-start justify-between p-6 aspect-square bg-surface-container-highest text-on-surface hover:bg-surface-dim transition-all duration-200">
+                    <span class="material-symbols-outlined text-4xl">domain</span>
+                    <span class="font-headline font-bold text-xl uppercase tracking-tight">Alvenaria</span>
+                </button>
+                <button onclick="selecionarAtividade('Elétrica', this)" class="btn-atividade flex flex-col items-start justify-between p-6 aspect-square bg-surface-container-highest text-on-surface hover:bg-surface-dim transition-all duration-200">
+                    <span class="material-symbols-outlined text-4xl">electrical_services</span>
+                    <span class="font-headline font-bold text-xl uppercase tracking-tight">Elétrica</span>
+                </button>
+                <button onclick="selecionarAtividade('Hidráulica', this)" class="btn-atividade flex flex-col items-start justify-between p-6 aspect-square bg-surface-container-highest text-on-surface hover:bg-surface-dim transition-all duration-200">
+                    <span class="material-symbols-outlined text-4xl">plumbing</span>
+                    <span class="font-headline font-bold text-xl uppercase tracking-tight">Hidráulica</span>
+                </button>
+            </div>
+            <div class="h-32"></div>
+        </main>
+
+        <div class="fixed bottom-20 left-0 w-full p-4 pointer-events-none md:bottom-6">
+            <div class="container mx-auto max-w-2xl flex justify-end pointer-events-auto">
+                <button onclick="goToView('view-step3')" class="w-full md:w-auto px-10 h-16 bg-primary text-on-primary font-headline font-black text-lg uppercase tracking-widest shadow-[8px_8px_0px_0px_rgba(112,93,0,0.3)] flex items-center justify-center gap-3">
+                    <span>Avançar</span> <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-step3" class="view-container hidden-view">
+        <header class="bg-[#fcf9f8] dark:bg-stone-950 flex items-center w-full px-6 h-16 max-w-none sticky top-0 z-50">
+            <button onclick="goToView('view-step2')" class="active:scale-95 text-[#705d00]"><span class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="font-['Space_Grotesk'] text-xl font-black uppercase tracking-tighter ml-4">SITE LOG PRO</h1>
+        </header>
+
+        <main class="flex-grow p-6 flex flex-col max-w-2xl mx-auto w-full">
+            <div class="mb-12">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="font-headline font-bold text-4xl text-primary leading-none">03</span>
+                    <span class="font-label font-bold text-sm text-outline uppercase tracking-widest">Etapa de 05</span>
+                </div>
+                <div class="h-4 bg-surface-container-highest w-full overflow-hidden">
+                    <div class="h-full bg-primary-container w-[60%]"></div>
+                </div>
+            </div>
+
+            <section class="mb-12">
+                <h2 class="font-headline font-bold text-6xl md:text-7xl leading-[0.9] tracking-tighter uppercase mb-8">TEVE<br/>PROBLEMA?</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="selecionarProblema(true, this)" class="btn-prob flex flex-col items-center justify-center h-48 bg-surface-container-high border-l-4 border-transparent overflow-hidden">
+                        <span class="font-headline font-black text-5xl">SIM</span>
+                        <span class="material-symbols-outlined text-4xl mt-2 text-outline">report_problem</span>
+                    </button>
+                    <button onclick="selecionarProblema(false, this)" class="btn-prob flex flex-col items-center justify-center h-48 bg-surface-container-high border-l-4 border-transparent overflow-hidden">
+                        <span class="font-headline font-black text-5xl">NÃO</span>
+                        <span class="material-symbols-outlined text-4xl mt-2 text-outline">check_circle</span>
+                    </button>
+                </div>
+            </section>
+
+            <div class="mt-auto pt-8">
+                <button onclick="goToView('view-step4')" class="w-full h-16 bg-primary-container flex items-center justify-center gap-4 active:scale-[0.98]">
+                    <span class="font-headline font-black text-2xl uppercase text-on-primary-container tracking-tight">Avançar</span>
+                    <span class="material-symbols-outlined font-bold text-on-primary-container">arrow_forward</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="view-step4" class="view-container hidden-view">
+        <header class="bg-[#fcf9f8] flex items-center w-full px-6 h-16 max-w-none sticky top-0 z-40">
+            <button onclick="goToView('view-step3')" class="text-[#705d00] active:scale-95 mr-4"><span class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="text-xl font-black uppercase tracking-tighter font-['Space_Grotesk']">SITE LOG PRO</h1>
+        </header>
+
+        <main class="flex-grow pt-8 pb-32 px-6 max-w-2xl mx-auto w-full relative overflow-hidden">
+            <div class="mb-12">
+                <div class="flex justify-between items-end mb-4">
+                    <span class="font-headline font-bold text-4xl text-primary tracking-tighter">04</span>
+                    <span class="font-label font-bold text-sm text-secondary uppercase">Progress: 80%</span>
+                </div>
+                <div class="h-4 w-full bg-surface-container-high rounded-none flex">
+                    <div class="h-full bg-primary-container w-4/5"></div>
+                </div>
+            </div>
+
+            <section class="mb-12">
+                <h2 class="font-headline font-bold text-5xl leading-[0.9] tracking-tighter uppercase mb-4">PASSO 4:<br/><span class="text-primary-container bg-on-background px-2">MEDIÇÃO</span></h2>
+                <p class="text-on-surface-variant font-medium">Informe a metragem executada hoje.</p>
+            </section>
+
+            <div class="mb-12 group">
+                <label class="block font-label font-bold text-xs uppercase mb-2 text-secondary px-1">Entrada Manual (m²)</label>
+                <div class="relative flex items-center bg-surface-container-low border-l-4 border-primary">
+                    <input id="input-medicao" class="w-full bg-transparent border-none h-20 text-4xl font-headline font-bold px-6 focus:ring-0" placeholder="0.00" type="number" oninput="appState.medicao = this.value" />
+                </div>
+            </div>
+
+            <button onclick="atualizarResumo(); goToView('view-step5')" class="w-full bg-primary-container text-on-primary-container h-20 flex items-center justify-between px-8 active:scale-[0.98] shadow-[4px_4px_0px_0px_rgba(112,93,0,1)]">
+                <span class="font-headline font-black text-2xl uppercase tracking-widest italic">Avançar</span>
+                <span class="material-symbols-outlined text-3xl font-bold">arrow_forward</span>
+            </button>
+        </main>
+    </div>
+
+    <div id="view-step5" class="view-container hidden-view">
+        <header class="bg-[#fcf9f8] flex items-center w-full px-6 h-16 max-w-none sticky top-0 z-40">
+            <button onclick="goToView('view-step4')" class="text-[#705d00]"><span class="material-symbols-outlined">arrow_back</span></button>
+            <h1 class="font-['Space_Grotesk'] font-bold text-xl uppercase tracking-tighter ml-4">SITE LOG PRO</h1>
+        </header>
+
+        <main class="max-w-xl mx-auto px-6 pt-8 space-y-8 pb-32">
+            <section>
+                <h2 class="font-headline text-4xl font-black uppercase leading-none tracking-tighter text-on-background">RESUMO DO<br/>REGISTRO</h2>
+            </section>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="p-6 bg-surface-container-low rounded-lg relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Obra / Atividade</span>
+                    <p id="resumo-obra" class="font-headline text-xl font-bold leading-tight uppercase mt-1">-</p>
+                    <p id="resumo-atividade" class="font-body font-bold mt-1 text-primary">-</p>
+                </div>
+
+                <div class="p-6 bg-surface-container-low rounded-lg relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Medição</span>
+                    <p id="resumo-medicao" class="font-headline text-3xl font-black">0 m²</p>
+                </div>
+            </div>
+
+            <div class="pt-8">
+                <button onclick="enviarRegistroBackend()" id="btn-final-salvar" class="w-full h-20 bg-primary text-on-primary rounded-lg flex items-center justify-between px-8 relative overflow-hidden group active:scale-[0.98] transition-all">
+                    <span class="font-headline text-2xl font-black uppercase tracking-tight relative z-10">SALVAR REGISTRO</span>
+                    <span class="material-symbols-outlined text-3xl relative z-10">task_alt</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-20 bg-[#fcf9f8] dark:bg-stone-950 border-t-4 border-[#ffd600]">
+        <a class="flex flex-col items-center justify-center p-4 w-full text-stone-500"><span class="material-symbols-outlined">edit_note</span></a>
+        <a class="flex flex-col items-center justify-center p-4 w-full bg-[#ffd600] text-[#705d00]"><span class="material-symbols-outlined">engineering</span></a>
+        <a class="flex flex-col items-center justify-center p-4 w-full text-stone-500"><span class="material-symbols-outlined">check_circle</span></a>
+    </nav>
+
+    <script>
+        // Substitua pelo link do seu Google Apps Script (Web App)
+        const API_URL = "SUA_URL_DO_GAS_AQUI"; 
+
+        const appState = {
+            id_obra: null,
+            nome_obra: null,
+            foto_base64: null,
+            atividade: null,
+            teve_problema: false,
+            medicao: 0,
+            criado_por: "Eng. Alexandre"
+        };
+
+        // Função de Navegação
+        function goToView(viewId) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById(viewId).classList.remove('hidden-view');
+            window.scrollTo(0, 0);
+        }
+
+        // Home -> Passo 1
+        function iniciarRegistro(id, nome) {
+            appState.id_obra = id;
+            appState.nome_obra = nome;
+            goToView('view-step1');
+        }
+
+        // Captura de Imagem (Passo 1)
+        const btnCamera = document.getElementById('btn-camera');
+        const cameraInput = document.getElementById('camera-input');
+        const previewFoto = document.getElementById('preview-foto');
+        const placeholderFoto = document.getElementById('placeholder-foto');
+        const btnNextStep1 = document.getElementById('btn-next-step1');
+
+        btnCamera.addEventListener('click', () => cameraInput.click());
+
+        cameraInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    appState.foto_base64 = reader.result;
+                    previewFoto.src = reader.result;
+                    previewFoto.classList.remove('hidden');
+                    placeholderFoto.classList.add('hidden');
+                    
+                    btnNextStep1.disabled = false;
+                    btnNextStep1.style.opacity = '1';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Seleção de Atividade (Passo 2)
+        function selecionarAtividade(atividade, element) {
+            appState.atividade = atividade;
+            document.querySelectorAll('.btn-atividade').forEach(el => {
+                el.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary');
+                el.classList.add('bg-surface-container-highest', 'text-on-surface');
+            });
+            element.classList.remove('bg-surface-container-highest', 'text-on-surface');
+            element.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary', 'border-l-4');
+        }
+
+        // Seleção de Problema (Passo 3)
+        function selecionarProblema(teveProblema, element) {
+            appState.teve_problema = teveProblema;
+            document.querySelectorAll('.btn-prob').forEach(el => {
+                el.classList.remove('bg-error-container', 'border-error', 'bg-primary-container', 'border-primary');
+                el.classList.add('bg-surface-container-high');
+            });
+            
+            if (teveProblema) {
+                element.classList.add('bg-error-container', 'border-error');
+            } else {
+                element.classList.add('bg-primary-container', 'border-primary');
+            }
+        }
+
+        // Atualizar Resumo (Passo 5)
+        function atualizarResumo() {
+            document.getElementById('resumo-obra').innerText = appState.nome_obra || "Nenhuma Obra Selecionada";
+            document.getElementById('resumo-atividade').innerText = appState.atividade || "Atividade não informada";
+            document.getElementById('resumo-medicao').innerText = (appState.medicao || "0") + " m²";
+        }
+
+        // Enviar Dados (Passo 5 -> Apps Script)
+        async function enviarRegistroBackend() {
+            const btnSalvar = document.getElementById('btn-final-salvar');
+            btnSalvar.innerHTML = `<span class="font-headline text-xl font-black uppercase relative z-10">ENVIANDO...</span>`;
+            
+            try {
+                // 1. Enviar Registro de Texto
+                const payloadRegistro = {
+                    id_obra: appState.id_obra,
+                    descricao_atividade: appState.atividade,
+                    problemas: appState.teve_problema ? "Sim" : "Não",
+                    medicoes: `${appState.medicao} m²`,
+                    criado_por: appState.criado_por
+                };
+
+                const reqRegistro = await fetch(`${API_URL}?action=criarRegistro`, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payloadRegistro),
+                    redirect: "follow"
+                });
+                const resRegistro = await reqRegistro.json();
+
+                // 2. Enviar Foto vinculada ao ID
+                if (resRegistro.success && appState.foto_base64) {
+                    const idRegistroGerado = resRegistro.data.id_registro;
+                    const payloadFoto = {
+                        id_registro: idRegistroGerado,
+                        base64: appState.foto_base64
+                    };
+                    
+                    await fetch(`${API_URL}?action=uploadFoto`, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(payloadFoto),
+                        redirect: "follow"
+                    });
+                }
+
+                alert("Sucesso! O registro foi salvo no banco de dados.");
+                // Reset e volta pro Home
+                appState.foto_base64 = null;
+                appState.medicao = 0;
+                document.getElementById('input-medicao').value = "";
+                goToView('view-home');
+
+            } catch (error) {
+                console.error("Erro no envio:", error);
+                alert("Ocorreu um erro ao enviar. Tente novamente.");
+            } finally {
+                btnSalvar.innerHTML = `<span class="font-headline text-2xl font-black uppercase relative z-10">SALVAR REGISTRO</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
