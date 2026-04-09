@@ -1,4 +1,4 @@
-// app.js — lógica principal do Diário de Obra
+// app.js — Diário de Obra — lógica principal
 
 // ===================== ESTADO GLOBAL =====================
 const state = {
@@ -6,69 +6,53 @@ const state = {
   obraAtual: null,
   step: 1,
   totalSteps: 5,
-  foto: null,         // base64
+  foto: null,
   atividade: null,
   atividadeCustom: '',
   temProblema: false,
   categoriaProblema: '',
   descricaoProblema: '',
   medicao: '',
-  criado_por: 'Engenheiro de Campo'
+  criado_por: 'Operário'
 };
 
-// ===================== ELEMENTOS =====================
-const elHome = () => document.getElementById('screen-home');
-const elSteps = () => document.getElementById('screen-steps');
-const elObrasContainer = () => document.getElementById('obras-list');
-const elLoadingOverlay = () => document.getElementById('loading-overlay');
-const elLoadingText = () => document.getElementById('loading-text');
-const elToast = () => document.getElementById('toast');
-const elProgressFill = () => document.getElementById('progress-fill');
-const elStepLabel = () => document.getElementById('step-label');
-const elStepPct = () => document.getElementById('step-pct');
-const elStepTitle = () => document.getElementById('step-title');
-const elStepBody = () => document.getElementById('step-body');
-const elBtnNext = () => document.getElementById('btn-next');
-const elBtnBack = () => document.getElementById('btn-back-step');
-const elObraBannerName = () => document.getElementById('obra-banner-name');
-const elObraBannerId = () => document.getElementById('obra-banner-id');
-const elSearchInput = () => document.getElementById('search-input');
-const elStatObras = () => document.getElementById('stat-obras');
-const elStatPending = () => document.getElementById('stat-pending');
-const elOnlineBadge = () => document.getElementById('online-badge');
+const $ = id => document.getElementById(id);
 
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', async () => {
-  registerSW();
-  updateOnlineBadge();
-  window.addEventListener('online', updateOnlineBadge);
-  window.addEventListener('offline', updateOnlineBadge);
+  registrarSW();
+  atualizarConexao();
+  window.addEventListener('online',  atualizarConexao);
+  window.addEventListener('offline', atualizarConexao);
   await carregarObras();
-  setupSearch();
-  setupOnlineSync();
+  configurarBusca();
+  configurarSyncOnline();
+  configurarBotaoRegistrar();
 });
 
-function registerSW() {
+// ===================== SERVICE WORKER =====================
+function registrarSW() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   }
 }
 
-function updateOnlineBadge() {
-  const el = elOnlineBadge();
+// ===================== CONEXÃO =====================
+function atualizarConexao() {
+  const el = $('online-badge');
   if (!el) return;
   if (navigator.onLine) {
-    el.textContent = 'ONLINE';
+    el.textContent = 'CONECTADO';
     el.className = 'badge-online online';
   } else {
-    el.textContent = 'OFFLINE';
+    el.textContent = 'SEM SINAL';
     el.className = 'badge-online offline';
   }
 }
 
 // ===================== CARREGAR OBRAS =====================
 async function carregarObras() {
-  showLoading('Carregando obras...');
+  mostrarLoading('Carregando obras...');
   try {
     let obras;
     if (navigator.onLine) {
@@ -77,225 +61,292 @@ async function carregarObras() {
     } else {
       obras = Storage.getObras();
     }
-    state.obras = obras || [];
-    renderObras(state.obras);
-    updateStats();
+    state.obras = Array.isArray(obras) ? obras : [];
+    renderizarObras(state.obras);
+    atualizarContadores();
   } catch (e) {
     state.obras = Storage.getObras();
-    renderObras(state.obras);
-    updateStats();
+    renderizarObras(state.obras);
+    atualizarContadores();
     if (state.obras.length === 0) {
-      showToast('Sem conexão — nenhuma obra em cache', 'warning');
+      mostrarAviso('Sem conexão — nenhuma obra em cache', 'warning');
     }
   } finally {
-    hideLoading();
+    esconderLoading();
   }
 }
 
-function updateStats() {
-  if (elStatObras()) elStatObras().textContent = String(state.obras.length).padStart(2, '0');
-  const queue = Storage.getQueue();
-  if (elStatPending()) elStatPending().textContent = String(queue.length).padStart(2, '0');
+function atualizarContadores() {
+  const elObras   = $('stat-obras');
+  const elPending = $('stat-pending');
+  if (elObras)   elObras.textContent   = String(state.obras.length).padStart(2, '0');
+  const fila = Storage.getQueue();
+  if (elPending) elPending.textContent = String(fila.length).padStart(2, '0');
 }
 
-function renderObras(obras) {
-  const container = elObrasContainer();
+// ===================== RENDER LISTA DE OBRAS =====================
+function renderizarObras(obras) {
+  const container = $('obras-list');
   if (!container) return;
+
   if (!obras || obras.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
         <div class="icon">🏗️</div>
-        <div class="msg">Nenhuma obra encontrada</div>
+        <div class="msg">NENHUMA OBRA CADASTRADA</div>
+        <div class="msg" style="font-size:0.75rem;margin-top:8px;font-weight:400;text-transform:none">
+          Peça ao seu encarregado ou gestor para cadastrar a obra no sistema.
+        </div>
       </div>`;
     return;
   }
+
+  // Status visual — rotacionado por enquanto (back-end não retorna status)
+  const statusOpts = [
+    { classe: 'badge-em-andamento', texto: 'EM ANDAMENTO' },
+    { classe: 'badge-pendente',     texto: 'PENDENTE'     },
+    { classe: 'badge-registrada',   texto: 'REGISTRADA'   }
+  ];
+
   container.innerHTML = obras.map((obra, i) => {
-    const id = obra.id_obra || obra['id_obra'] || '';
-    const nome = obra.nome || 'Obra sem nome';
-    const empresa = obra.empresa || '';
-    const badges = ['badge-progress', 'badge-pending', 'badge-logged'];
-    const badgeLabels = ['IN PROGRESS', 'PENDING LOG', 'LOGGED'];
-    const bi = i % 3;
+    const id   = obra.id_obra || '';
+    const nome = obra.nome    || 'Obra sem nome';
+    const emp  = obra.empresa || obra.endereco || '';
+    const st   = statusOpts[i % statusOpts.length];
+    const idSafe = encodeURIComponent(id);
+    const nomeSafe = encodeURIComponent(nome);
+
     return `
-    <div class="obra-card" onclick="selecionarObra('${id}', '${escHtml(nome)}')">
+    <div class="obra-card" onclick="selecionarObra('${idSafe}', '${nomeSafe}')">
       <div style="position:relative">
         <div class="obra-card-img-placeholder">🏗️</div>
-        <div class="obra-card-badge ${badges[bi]}">${badgeLabels[bi]}</div>
+        <div class="obra-card-badge ${st.classe}">${st.texto}</div>
       </div>
       <div class="obra-card-body">
-        <div class="obra-card-id">ID: #${id.slice(0,8).toUpperCase()}</div>
-        <div class="obra-card-name">${escHtml(nome)}</div>
-        <div class="obra-card-manager">👷 ${escHtml(empresa)}</div>
+        <div class="obra-card-id">CÓD: ${id.slice(0,8).toUpperCase()}</div>
+        <div class="obra-card-name">${safe(nome)}</div>
+        ${emp ? `<div class="obra-card-manager">👷 ${safe(emp)}</div>` : ''}
+        <div class="obra-card-action">Toque para registrar →</div>
       </div>
     </div>`;
   }).join('');
 }
 
-function setupSearch() {
-  const inp = elSearchInput();
+function configurarBusca() {
+  const inp = $('search-input');
   if (!inp) return;
   inp.addEventListener('input', () => {
-    const q = inp.value.toLowerCase();
-    const filtradas = state.obras.filter(o =>
-      (o.nome || '').toLowerCase().includes(q) ||
-      (o.empresa || '').toLowerCase().includes(q)
-    );
-    renderObras(filtradas);
+    const q = inp.value.toLowerCase().trim();
+    const filtradas = q
+      ? state.obras.filter(o =>
+          (o.nome     || '').toLowerCase().includes(q) ||
+          (o.empresa  || '').toLowerCase().includes(q) ||
+          (o.endereco || '').toLowerCase().includes(q)
+        )
+      : state.obras;
+    renderizarObras(filtradas);
+  });
+}
+
+function configurarBotaoRegistrar() {
+  const btn = $('btn-registrar-home');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    if (state.obras.length === 0) {
+      mostrarAviso('Nenhuma obra disponível. Fale com o encarregado.', 'warning');
+      return;
+    }
+    if (state.obras.length === 1) {
+      const o = state.obras[0];
+      selecionarObra(encodeURIComponent(o.id_obra), encodeURIComponent(o.nome));
+      return;
+    }
+    $('obras-list').scrollIntoView({ behavior: 'smooth' });
+    mostrarAviso('Toque em uma obra para registrar', '');
   });
 }
 
 // ===================== SELECIONAR OBRA =====================
-window.selecionarObra = function(id, nome) {
+window.selecionarObra = function(idEnc, nomeEnc) {
+  const id   = decodeURIComponent(idEnc);
+  const nome = decodeURIComponent(nomeEnc);
   state.obraAtual = state.obras.find(o => o.id_obra === id) || { id_obra: id, nome };
   iniciarFluxo();
 };
 
-// ===================== FLUXO DE REGISTRO =====================
+// ===================== FLUXO =====================
 function iniciarFluxo() {
-  state.step = 1;
-  state.foto = null;
-  state.atividade = null;
-  state.atividadeCustom = '';
-  state.temProblema = false;
-  state.categoriaProblema = '';
-  state.descricaoProblema = '';
-  state.medicao = '';
+  Object.assign(state, {
+    step: 1, foto: null, atividade: null, atividadeCustom: '',
+    temProblema: false, categoriaProblema: '', descricaoProblema: '', medicao: ''
+  });
 
-  elHome().style.display = 'none';
-  elSteps().style.display = 'block';
+  $('screen-home').style.display  = 'none';
+  $('screen-steps').style.display = 'block';
+  window.scrollTo(0, 0);
 
-  // Banner da obra
-  if (elObraBannerName()) elObraBannerName().textContent = state.obraAtual.nome;
-  if (elObraBannerId()) elObraBannerId().textContent = 'ID: ' + (state.obraAtual.id_obra || '').slice(0,8).toUpperCase();
+  const nomeBanner = $('obra-banner-name');
+  const idBanner   = $('obra-banner-id');
+  if (nomeBanner) nomeBanner.textContent = state.obraAtual.nome || '—';
+  if (idBanner)   idBanner.textContent   = 'CÓD: ' + (state.obraAtual.id_obra || '').slice(0,8).toUpperCase();
 
-  renderStep();
+  renderizarEtapa();
 }
 
-function voltarHome() {
-  elSteps().style.display = 'none';
-  elHome().style.display = 'block';
-  updateStats();
-}
+window.voltarHome = function() {
+  $('screen-steps').style.display = 'none';
+  $('screen-home').style.display  = 'block';
+  window.scrollTo(0, 0);
+  atualizarContadores();
+};
 
-function renderStep() {
-  const s = state.step;
+// ===================== RENDER ETAPA =====================
+function renderizarEtapa() {
+  const s   = state.step;
   const pct = Math.round((s / state.totalSteps) * 100);
 
-  if (elProgressFill()) elProgressFill().style.width = pct + '%';
-  if (elStepPct()) elStepPct().textContent = pct + '%';
-  if (elStepLabel()) elStepLabel().textContent = `PASSO ${s} DE ${state.totalSteps}`;
+  const elFill  = $('progress-fill');
+  const elPct   = $('step-pct');
+  const elLabel = $('step-label');
+  const elTitle = $('step-title');
+  const elBody  = $('step-body');
 
-  const titles = ['', 'FOTO DA OBRA', 'ATIVIDADE', 'TEVE PROBLEMA?', 'MEDIÇÃO', 'RESUMO'];
-  if (elStepTitle()) elStepTitle().innerHTML = `PASSO ${s}: ${titles[s]}<span></span>`;
+  if (elFill)  elFill.style.width  = pct + '%';
+  if (elPct)   elPct.textContent   = pct + '%';
+  if (elLabel) elLabel.textContent = `ETAPA ${s} DE ${state.totalSteps}`;
 
-  const body = elStepBody();
-  if (!body) return;
+  const titulos = ['', 'FOTO DA OBRA', 'O QUE FOI FEITO?', 'TEVE PROBLEMA?', 'QUANTO FEZ HOJE?', 'REVISAR E ENVIAR'];
+  if (elTitle) elTitle.innerHTML = `ETAPA ${s}: ${titulos[s]}<span></span>`;
 
+  if (!elBody) return;
   switch (s) {
-    case 1: body.innerHTML = renderStep1(); setupStep1(); break;
-    case 2: body.innerHTML = renderStep2(); setupStep2(); break;
-    case 3: body.innerHTML = renderStep3(); setupStep3(); break;
-    case 4: body.innerHTML = renderStep4(); setupStep4(); break;
-    case 5: body.innerHTML = renderStep5(); break;
+    case 1: elBody.innerHTML = htmlEtapa1(); break;
+    case 2: elBody.innerHTML = htmlEtapa2(); break;
+    case 3: elBody.innerHTML = htmlEtapa3(); break;
+    case 4: elBody.innerHTML = htmlEtapa4(); break;
+    case 5: elBody.innerHTML = htmlEtapa5(); break;
   }
 
-  updateNextBtn();
+  atualizarBotaoNext();
 }
 
-function updateNextBtn() {
-  const btn = elBtnNext();
+function atualizarBotaoNext() {
+  const btn = $('btn-next');
   if (!btn) return;
-  const s = state.step;
-  if (s === state.totalSteps) {
-    btn.textContent = '✔ SALVAR REGISTRO';
+  if (state.step === state.totalSteps) {
+    btn.innerHTML = '✔ ENVIAR REGISTRO';
     btn.classList.add('dark');
     btn.disabled = false;
   } else {
-    btn.innerHTML = 'AVANÇAR →';
+    btn.innerHTML = 'CONTINUAR →';
     btn.classList.remove('dark');
-    btn.disabled = !canProceed();
+    btn.disabled = !podeContinuar();
   }
 }
 
-function canProceed() {
+function podeContinuar() {
   switch (state.step) {
     case 1: return !!state.foto;
-    case 2: return !!state.atividade;
+    case 2: return !!(state.atividade === 'outro' ? state.atividadeCustom.trim() : state.atividade);
     case 3: return true;
-    case 4: return !!(state.medicao && parseFloat(state.medicao) >= 0);
+    case 4: return state.medicao !== '' && !isNaN(parseFloat(state.medicao));
     case 5: return true;
     default: return true;
   }
 }
 
 window.avancar = async function() {
-  if (!canProceed()) return;
+  if (!podeContinuar()) {
+    mostrarAviso('Preencha antes de continuar', 'warning');
+    return;
+  }
   if (state.step === state.totalSteps) {
-    await salvarRegistro();
+    await enviarRegistro();
     return;
   }
   state.step++;
-  renderStep();
+  renderizarEtapa();
+  window.scrollTo(0, 0);
 };
 
 window.voltarPasso = function() {
   if (state.step === 1) { voltarHome(); return; }
   state.step--;
-  renderStep();
+  renderizarEtapa();
+  window.scrollTo(0, 0);
 };
 
-// ===================== PASSO 1 — FOTO =====================
-function renderStep1() {
+// ===================== ETAPA 1 — FOTO =====================
+function htmlEtapa1() {
   return `
-    <div class="photo-zone ${state.foto ? 'has-photo' : ''}" id="photo-zone">
+    <div class="photo-zone ${state.foto ? 'has-photo' : ''}" onclick="abrirCamera()">
       ${state.foto ? `<img src="${state.foto}" alt="Foto da obra">` : ''}
       <div class="photo-zone-placeholder">
         <div class="icon">📷</div>
-        <div class="text">NENHUMA IMAGEM<br>CAPTURADA</div>
+        <div class="text">TOQUE PARA<br>TIRAR FOTO</div>
       </div>
     </div>
-    <button class="btn-primary" onclick="abrirCamera()">📷 ABRIR CÂMERA</button>
-    <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none" onchange="handleFoto(this)">
-    ${!state.foto ? `
-    <div class="field-alert">
-      <div class="alert-icon">⚠️</div>
-      <div class="alert-text">A foto é obrigatória para continuar o registro diário. Certifique-se de que a iluminação esteja adequada.</div>
-    </div>` : `
-    <div class="field-tip">
-      <div class="alert-icon">✅</div>
-      <div class="alert-text">Foto capturada! Clique em AVANÇAR para continuar.</div>
-    </div>`}
+    <input type="file" id="file-input" accept="image/*" capture="environment"
+           style="display:none" onchange="processarFoto(this)">
+    <button class="btn-primary" onclick="abrirCamera()" style="margin-bottom:12px">
+      📷 ${state.foto ? 'TROCAR FOTO' : 'ABRIR CÂMERA'}
+    </button>
+    ${!state.foto
+      ? `<div class="field-alert">
+           <div class="alert-icon">⚠️</div>
+           <div class="alert-text"><strong>A foto é obrigatória.</strong><br>
+           Tire uma foto do serviço realizado hoje.</div>
+         </div>`
+      : `<div class="field-tip">
+           <div class="alert-icon">✅</div>
+           <div class="alert-text"><strong>Foto registrada!</strong> Toque em CONTINUAR.</div>
+         </div>`}
   `;
 }
 
-function setupStep1() {}
-
 window.abrirCamera = function() {
-  const inp = document.getElementById('file-input');
+  const inp = $('file-input');
   if (inp) inp.click();
 };
 
-window.handleFoto = function(input) {
+window.processarFoto = function(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    state.foto = e.target.result;
-    renderStep();
+    const img = new Image();
+    img.onload = () => {
+      // Redimensiona para max 1200px — reduz base64 ~80%
+      const MAX = 1200;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else        { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      state.foto = canvas.toDataURL('image/jpeg', 0.75);
+      renderizarEtapa();
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 };
 
-// ===================== PASSO 2 — ATIVIDADE =====================
+// ===================== ETAPA 2 — ATIVIDADE =====================
 const ATIVIDADES = [
-  { key: 'concretagem',  label: 'CONCRETAGEM', icon: '🏗️' },
-  { key: 'alvenaria',    label: 'ALVENARIA',   icon: '🧱' },
-  { key: 'eletrica',     label: 'ELÉTRICA',    icon: '⚡' },
-  { key: 'hidraulica',   label: 'HIDRÁULICA',  icon: '🔧' }
+  { key: 'concretagem', label: 'CONCRETAGEM', icon: '🏗️' },
+  { key: 'alvenaria',   label: 'ALVENARIA',   icon: '🧱' },
+  { key: 'eletrica',    label: 'ELÉTRICA',    icon: '⚡' },
+  { key: 'hidraulica',  label: 'HIDRÁULICA',  icon: '🔧' },
+  { key: 'pintura',     label: 'PINTURA',     icon: '🖌️' },
+  { key: 'escavacao',   label: 'ESCAVAÇÃO',   icon: '⛏️' },
 ];
 
-function renderStep2() {
+function htmlEtapa2() {
   return `
+    <p class="step-hint">O que foi feito hoje? Toque em uma opção.</p>
     <div class="atividade-grid">
       ${ATIVIDADES.map(a => `
         <button class="atividade-btn ${state.atividade === a.key ? 'selected' : ''}"
@@ -306,48 +357,40 @@ function renderStep2() {
         </button>
       `).join('')}
     </div>
-    <div class="atividade-outro" onclick="selecionarAtividade('outro')">
-      <div class="label ${state.atividade === 'outro' ? '' : ''}">
-        <span>• • •</span> OUTRO
-      </div>
+    <div class="atividade-outro ${state.atividade === 'outro' ? 'selected-outro' : ''}"
+         onclick="selecionarAtividade('outro')">
+      <div class="label">• • •&nbsp;&nbsp; OUTRO SERVIÇO</div>
       <span>›</span>
     </div>
     ${state.atividade === 'outro' ? `
-    <input type="text" id="outro-input" class="search-input" style="margin-top:10px"
-           placeholder="Descreva a atividade..." value="${escHtml(state.atividadeCustom)}"
-           oninput="state.atividadeCustom = this.value; updateNextBtn()">
+      <input type="text" id="outro-input" class="search-input"
+             style="margin-top:10px;font-size:1rem;padding:14px"
+             placeholder="Descreva o serviço..."
+             value="${safe(state.atividadeCustom)}"
+             oninput="state.atividadeCustom = this.value; atualizarBotaoNext()">
     ` : ''}
-    <div class="field-tip" style="margin-top:16px">
-      <div>
-        <div class="tip-label">AVISO DE CAMPO</div>
-        <div class="alert-text">A seleção da atividade principal habilita formulários específicos de inspeção.</div>
-      </div>
-    </div>
   `;
 }
 
-function setupStep2() {}
-
 window.selecionarAtividade = function(key) {
   state.atividade = key;
-  renderStep();
+  renderizarEtapa();
   if (key === 'outro') {
-    setTimeout(() => {
-      const inp = document.getElementById('outro-input');
-      if (inp) inp.focus();
-    }, 50);
+    setTimeout(() => { const el = $('outro-input'); if (el) el.focus(); }, 80);
   }
 };
 
-// ===================== PASSO 3 — PROBLEMA =====================
+// ===================== ETAPA 3 — PROBLEMA =====================
 const CATEGORIAS = [
-  { key: 'atraso',    nome: 'ATRASO',           sub: 'CRONOGRAMA',  icon: '🕐' },
-  { key: 'material',  nome: 'FALTA DE MATERIAL', sub: 'SUPRIMENTOS', icon: '📦' },
-  { key: 'outro',     nome: 'OUTRO',             sub: 'DIVERSOS',    icon: '•••' }
+  { key: 'atraso',    nome: 'ATRASO',           sub: 'Cronograma',  icon: '🕐' },
+  { key: 'material',  nome: 'FALTA DE MATERIAL', sub: 'Suprimentos', icon: '📦' },
+  { key: 'acidente',  nome: 'ACIDENTE / RISCO',  sub: 'Segurança',   icon: '🚨' },
+  { key: 'outro',     nome: 'OUTRO',             sub: 'Geral',       icon: '📝' },
 ];
 
-function renderStep3() {
+function htmlEtapa3() {
   return `
+    <p class="step-hint">Aconteceu algum problema hoje?</p>
     <div class="sim-nao-grid">
       <button class="sn-btn ${state.temProblema ? 'selected-sim' : ''}"
               onclick="definirProblema(true)">
@@ -361,7 +404,7 @@ function renderStep3() {
       </button>
     </div>
     ${state.temProblema ? `
-      <div class="categoria-label">SELECIONE A CATEGORIA</div>
+      <div class="categoria-label">QUAL FOI O PROBLEMA?</div>
       <div class="categoria-list">
         ${CATEGORIAS.map(c => `
           <div class="categoria-item ${state.categoriaProblema === c.key ? 'selected' : ''}"
@@ -375,91 +418,85 @@ function renderStep3() {
         `).join('')}
       </div>
       <textarea class="textarea-problema" rows="3" id="desc-problema"
-                placeholder="Descreva o problema (opcional)..."
-                oninput="state.descricaoProblema = this.value">${escHtml(state.descricaoProblema)}</textarea>
+                placeholder="Descreva o que aconteceu (opcional)..."
+                oninput="state.descricaoProblema = this.value">${safe(state.descricaoProblema)}</textarea>
     ` : ''}
   `;
 }
 
-function setupStep3() {}
-
 window.definirProblema = function(sim) {
   state.temProblema = sim;
   if (!sim) { state.categoriaProblema = ''; state.descricaoProblema = ''; }
-  renderStep();
+  renderizarEtapa();
 };
 
 window.selecionarCategoria = function(key) {
   state.categoriaProblema = key;
-  renderStep();
+  renderizarEtapa();
 };
 
-// ===================== PASSO 4 — MEDIÇÃO =====================
-const CHIPS = [10, 20, 50];
+// ===================== ETAPA 4 — MEDIÇÃO =====================
+const CHIPS_MEDICAO = [10, 20, 50, 100];
 
-function renderStep4() {
+function htmlEtapa4() {
+  const chipAtivo = CHIPS_MEDICAO.includes(Number(state.medicao));
   return `
-    <p style="font-size:0.9rem;color:var(--grey-mid);margin-bottom:16px">
-      Informe a metragem executada hoje no setor.
-    </p>
+    <p class="step-hint">Quanto foi feito hoje? Escolha ou digite a quantidade.</p>
     <div class="medicao-chips">
-      ${CHIPS.map(v => `
-        <button class="chip-btn ${state.medicao == v ? 'selected' : ''}"
+      ${CHIPS_MEDICAO.map(v => `
+        <button class="chip-btn ${Number(state.medicao) === v ? 'selected' : ''}"
                 onclick="selecionarChip(${v})">
           <div class="chip-val">${v}</div>
           <div class="chip-unit">M²</div>
         </button>
       `).join('')}
     </div>
-    <div class="medicao-manual-label">ENTRADA MANUAL (M²)</div>
+    <div class="medicao-manual-label">DIGITAR QUANTIDADE (M²)</div>
     <div class="medicao-input-wrap">
-      <input type="number" class="medicao-input" id="medicao-input"
-             value="${state.medicao}" placeholder="0.00"
-             oninput="state.medicao = this.value; clearChips(); updateNextBtn()">
+      <input type="number" inputmode="decimal" class="medicao-input" id="medicao-input"
+             value="${chipAtivo ? '' : safe(state.medicao)}"
+             placeholder="0.00"
+             oninput="state.medicao = this.value; atualizarBotaoNext()">
       <span style="font-size:1.2rem;color:var(--grey-mid)">📐</span>
     </div>
     <div class="field-tip">
       <div>
-        <div class="tip-label">DICA DE CAMPO</div>
-        <div class="alert-text">Certifique-se de que a área está limpa antes da medição final para evitar discrepâncias no log diário.</div>
+        <div class="tip-label">DICA</div>
+        <div class="alert-text">Informe a quantidade total executada no seu turno de hoje.</div>
       </div>
     </div>
   `;
 }
 
-function setupStep4() {}
-
 window.selecionarChip = function(v) {
   state.medicao = String(v);
-  renderStep();
+  renderizarEtapa();
 };
 
-window.clearChips = function() {
-  // chips visuais atualizam no próximo render — sem re-render para não perder foco
-};
-
-// ===================== PASSO 5 — RESUMO =====================
-function renderStep5() {
-  const ativLabel = ATIVIDADES.find(a => a.key === state.atividade)?.label ||
-    (state.atividade === 'outro' ? state.atividadeCustom : state.atividade) || '—';
+// ===================== ETAPA 5 — RESUMO =====================
+function htmlEtapa5() {
+  const ativLabel = ATIVIDADES.find(a => a.key === state.atividade)?.label
+    || (state.atividade === 'outro' ? state.atividadeCustom : state.atividade) || '—';
   const catLabel = CATEGORIAS.find(c => c.key === state.categoriaProblema)?.nome || '—';
+  const hoje = new Date().toLocaleDateString('pt-BR');
 
   return `
-    <p style="font-family:var(--font-display);font-size:0.65rem;font-weight:600;
-       letter-spacing:0.12em;text-transform:uppercase;color:var(--grey-mid);margin-bottom:16px">
-      CONFIRME AS INFORMAÇÕES ANTES DE FINALIZAR
-    </p>
+    <p class="step-hint">Confira as informações antes de enviar.</p>
     <div class="resumo-card">
       <div class="resumo-row">
+        <div class="resumo-sublabel">DATA</div>
+        <div class="resumo-value">${hoje}</div>
+      </div>
+      <div class="resumo-row">
         <div class="resumo-sublabel">OBRA</div>
-        <div class="resumo-value">${escHtml(state.obraAtual?.nome || '—')}</div>
+        <div class="resumo-value">${safe(state.obraAtual?.nome || '—')}</div>
       </div>
       <div class="resumo-row">
-        <div class="resumo-sublabel">ATIVIDADE</div>
-        <div class="resumo-value">${escHtml(ativLabel)}</div>
+        <div class="resumo-sublabel">SERVIÇO REALIZADO</div>
+        <div class="resumo-value">${safe(ativLabel)}</div>
       </div>
       <div class="resumo-row">
-        <div class="resumo-sublabel">MEDIÇÃO DIÁRIA</div>
+        <div class="resumo-sublabel">QUANTIDADE DO DIA</div>
         <div class="resumo-value big">${state.medicao || '0'} m²</div>
       </div>
     </div>
@@ -467,122 +504,128 @@ function renderStep5() {
     <div class="resumo-problema-card">
       <div class="rp-icon">❗</div>
       <div>
-        <div class="rp-title">OCORRÊNCIAS / PROBLEMAS</div>
-        <div class="rp-text">${escHtml(catLabel)}${state.descricaoProblema ? ' — ' + state.descricaoProblema : ''}</div>
+        <div class="rp-title">PROBLEMA REGISTRADO</div>
+        <div class="rp-text">
+          ${safe(catLabel)}
+          ${state.descricaoProblema ? `<br>${safe(state.descricaoProblema)}` : ''}
+        </div>
       </div>
-    </div>` : ''}
+    </div>` : `
+    <div class="field-tip">
+      <div class="alert-icon">✅</div>
+      <div class="alert-text">Nenhum problema registrado hoje.</div>
+    </div>`}
     ${state.foto ? `
-    <div class="media-section-label">MÍDIA ANEXADA</div>
+    <div class="media-section-label">FOTO DO SERVIÇO</div>
     <div class="media-grid">
       <img class="media-thumb" src="${state.foto}" alt="Foto da obra">
     </div>` : ''}
-    <button class="btn-secondary" onclick="voltarPasso()">← REVISAR ETAPAS ANTERIORES</button>
+    <button class="btn-secondary" onclick="voltarPasso()">← CORRIGIR ETAPA ANTERIOR</button>
   `;
 }
 
-// ===================== SALVAR REGISTRO =====================
-async function salvarRegistro() {
-  const ativLabel = ATIVIDADES.find(a => a.key === state.atividade)?.label ||
-    state.atividadeCustom || state.atividade || 'Não informada';
+// ===================== ENVIAR REGISTRO =====================
+async function enviarRegistro() {
+  const ativLabel = ATIVIDADES.find(a => a.key === state.atividade)?.label
+    || state.atividadeCustom || state.atividade || 'Não informado';
   const catLabel = CATEGORIAS.find(c => c.key === state.categoriaProblema)?.nome || '';
 
   const dadosRegistro = {
     id_obra: state.obraAtual.id_obra,
     descricao_atividade: ativLabel,
-    problemas: state.temProblema ? `${catLabel} — ${state.descricaoProblema}` : '',
+    problemas: state.temProblema
+      ? `${catLabel}${state.descricaoProblema ? ' — ' + state.descricaoProblema : ''}`
+      : '',
     medicoes: state.medicao + ' m²',
     criado_por: state.criado_por
   };
 
   if (!navigator.onLine) {
-    // Salvar na fila offline
     Storage.addToQueue({ ...dadosRegistro, _foto: state.foto });
-    updateStats();
-    showToast('Salvo offline — será enviado quando conectar', 'warning');
-    setTimeout(voltarHome, 2000);
+    atualizarContadores();
+    mostrarAviso('💾 Salvo no celular! Será enviado quando tiver sinal.', 'warning');
+    setTimeout(voltarHome, 2500);
     return;
   }
 
-  showLoading('Enviando registro...');
+  mostrarLoading('Enviando registro...');
   try {
     const registro = await API.criarRegistro(dadosRegistro);
-    if (state.foto && registro.id_registro) {
-      elLoadingText().textContent = 'Enviando foto...';
+
+    if (state.foto && registro?.id_registro) {
+      const elTxt = $('loading-text');
+      if (elTxt) elTxt.textContent = 'Enviando foto...';
       await API.uploadFoto(registro.id_registro, state.foto);
     }
-    hideLoading();
-    showToast('Registro salvo com sucesso! ✓', 'success');
+
+    esconderLoading();
+    mostrarAviso('✅ Registro enviado com sucesso!', 'success');
     setTimeout(voltarHome, 2200);
+
   } catch (e) {
-    hideLoading();
-    // fallback offline
+    esconderLoading();
     Storage.addToQueue({ ...dadosRegistro, _foto: state.foto });
-    updateStats();
-    showToast('Erro de rede — salvo offline', 'warning');
-    setTimeout(voltarHome, 2200);
+    atualizarContadores();
+    mostrarAviso('⚠️ Falha na rede. Salvo localmente, será enviado depois.', 'warning');
+    setTimeout(voltarHome, 2500);
   }
 }
 
-// ===================== SYNC ONLINE =====================
-function setupOnlineSync() {
+// ===================== SYNC AO VOLTAR ONLINE =====================
+function configurarSyncOnline() {
   window.addEventListener('online', async () => {
-    updateOnlineBadge();
-    const queue = Storage.getQueue();
-    if (queue.length === 0) return;
-    showToast(`Sincronizando ${queue.length} registro(s)...`, 'warning');
-    let synced = 0;
-    for (const item of [...queue]) {
+    atualizarConexao();
+    const fila = Storage.getQueue();
+    if (fila.length === 0) return;
+    mostrarAviso(`📡 Enviando ${fila.length} registro(s) pendente(s)...`, 'warning');
+    let enviados = 0;
+    for (const item of [...fila]) {
       try {
-        const foto = item._foto;
+        const foto  = item._foto;
         const dados = { ...item };
-        delete dados._foto;
-        delete dados.id_local;
-        delete dados.created_at;
+        delete dados._foto; delete dados.id_local; delete dados.created_at;
         const reg = await API.criarRegistro(dados);
-        if (foto && reg.id_registro) {
-          await API.uploadFoto(reg.id_registro, foto);
-        }
+        if (foto && reg?.id_registro) await API.uploadFoto(reg.id_registro, foto);
         Storage.removeFromQueue(item.id_local);
-        synced++;
+        enviados++;
       } catch { break; }
     }
-    updateStats();
-    if (synced > 0) showToast(`${synced} registro(s) sincronizado(s) ✓`, 'success');
+    atualizarContadores();
+    if (enviados > 0) mostrarAviso(`✅ ${enviados} registro(s) enviado(s)!`, 'success');
   });
 }
 
-// ===================== UTILS =====================
-function showLoading(msg = 'Carregando...') {
-  const overlay = elLoadingOverlay();
-  if (elLoadingText()) elLoadingText().textContent = msg;
-  if (overlay) overlay.classList.add('show');
-}
-function hideLoading() {
-  const overlay = elLoadingOverlay();
-  if (overlay) overlay.classList.remove('show');
+// ===================== HELPERS =====================
+function mostrarLoading(msg = 'Aguarde...') {
+  const el = $('loading-text');
+  if (el) el.textContent = msg;
+  const ov = $('loading-overlay');
+  if (ov) ov.classList.add('show');
 }
 
-let toastTimer;
-function showToast(msg, type = '') {
-  const el = elToast();
+function esconderLoading() {
+  const ov = $('loading-overlay');
+  if (ov) ov.classList.remove('show');
+}
+
+let _toastTimer;
+function mostrarAviso(msg, tipo = '') {
+  const el = $('toast');
   if (!el) return;
   el.textContent = msg;
-  el.className = 'toast show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3000);
+  el.className = 'toast show ' + tipo;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = 'toast'; }, 3500);
 }
 
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+function safe(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// Expõe para HTML
-window.voltarHome = voltarHome;
-window.updateNextBtn = updateNextBtn;
-window.state = state;
+// Globais necessários
+window.voltarHome         = voltarHome;
+window.atualizarBotaoNext = atualizarBotaoNext;
+window.state              = state;
+window.showToast          = mostrarAviso; // alias
