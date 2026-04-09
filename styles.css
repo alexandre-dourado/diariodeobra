@@ -680,6 +680,7 @@ body {
   margin-bottom: 20px;
 }
 .media-thumb {
+  width: 100%; /* <-- Essa é a linha que resolve o problema */
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: var(--radius);
