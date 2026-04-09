@@ -116,10 +116,17 @@ function renderizarObras(obras) {
     const idSafe = encodeURIComponent(id);
     const nomeSafe = encodeURIComponent(nome);
 
+    const fotoHtml = obra.foto_url
+      ? `<img class="obra-card-img" src="${safe(obra.foto_url)}" alt="${safe(nome)}"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholderStyle = obra.foto_url ? 'display:none' : '';
+
     return `
     <div class="obra-card" onclick="selecionarObra('${idSafe}', '${nomeSafe}')">
       <div style="position:relative">
-        <div class="obra-card-img-placeholder">🏗️</div>
+        ${fotoHtml}
+        <div class="obra-card-img-placeholder" style="${placeholderStyle}">🏗️</div>
         <div class="obra-card-badge ${st.classe}">${st.texto}</div>
       </div>
       <div class="obra-card-body">
