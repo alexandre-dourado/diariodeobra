@@ -1,4 +1,17 @@
-/* styles.css — Diário de Obra — Design Industrial */
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Diário de Obra — Registro diário de obras públicas">
+  <meta name="theme-color" content="#F5C800">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Diário Obra">
+  <link rel="manifest" href="manifest.json">
+  <title>Diário de Obra</title>
+  <style>/* styles.css — Diário de Obra — Design Industrial */
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 
@@ -701,17 +714,12 @@ body {
   margin-bottom: 20px;
 }
 .media-thumb {
-  width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: var(--radius);
   background: var(--grey-card);
 }
-/* Trava de segurança para imagens dinâmicas */
-.step-content img {
-  max-width: 100%;
-  height: auto;
-}
+
 /* ===================== BOTÕES DE AÇÃO ===================== */
 .btn-primary {
   width: 100%;
@@ -911,4 +919,112 @@ body {
 /* ===================== RESPONSIVE ===================== */
 @media (min-width: 480px) {
   body { box-shadow: 0 0 40px rgba(0,0,0,0.15); }
-}
+}</style>
+</head>
+<body>
+
+<!-- ================== LOADING ================== -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Carregando...</div>
+</div>
+
+<!-- ================== AVISO ================== -->
+<div class="toast" id="toast"></div>
+
+<!-- ======================================================
+     TELA INICIAL — LISTA DE OBRAS
+     ====================================================== -->
+<div id="screen-home">
+
+  <!-- CABEÇALHO -->
+  <div class="top-bar">
+    <div class="logo">DIÁRIO <span>DE</span> OBRA</div>
+    <div class="badge-online online" id="online-badge">CONECTADO</div>
+  </div>
+
+  <!-- CONTADORES -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-label">OBRAS ATIVAS</div>
+      <div class="stat-value" id="stat-obras">00</div>
+    </div>
+    <div class="stat-box highlight">
+      <div class="stat-label">ENVIOS PENDENTES</div>
+      <div class="stat-value" id="stat-pending">00</div>
+    </div>
+  </div>
+
+  <!-- BUSCA -->
+  <div class="search-area">
+    <input type="search" class="search-input" id="search-input"
+           placeholder="🔍  BUSCAR OBRA...">
+  </div>
+
+  <!-- LISTA DE OBRAS -->
+  <div class="obras-list pb-btn" id="obras-list">
+    <div class="empty-state">
+      <div class="icon">⏳</div>
+      <div class="msg">Carregando obras...</div>
+    </div>
+  </div>
+
+  <!-- BOTÃO PRINCIPAL -->
+  <button class="btn-registrar-fixed" id="btn-registrar-home">
+    📋 REGISTRAR O DIA +
+  </button>
+
+</div><!-- /screen-home -->
+
+
+<!-- ======================================================
+     FLUXO DE REGISTRO — PASSOS
+     ====================================================== -->
+<div id="screen-steps" style="display:none; padding-bottom:80px">
+
+  <!-- CABEÇALHO -->
+  <div class="top-bar">
+    <button class="btn-back" onclick="voltarPasso()">←</button>
+    <div class="logo">DIÁRIO <span>DE</span> OBRA</div>
+  </div>
+
+  <!-- BANNER DA OBRA SELECIONADA -->
+  <div class="obra-banner">
+    <div class="obra-banner-icon">🏗️</div>
+    <div class="obra-banner-info">
+      <div class="obra-banner-name" id="obra-banner-name">Obra</div>
+      <div class="obra-banner-id" id="obra-banner-id">—</div>
+    </div>
+  </div>
+
+  <!-- PROGRESSO -->
+  <div class="steps-header">
+    <div class="step-counter">
+      <div class="step-label" id="step-label">ETAPA 1 DE 5</div>
+      <div class="step-pct" id="step-pct">20%</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:20%"></div>
+    </div>
+    <div class="step-title" id="step-title">ETAPA 1: FOTO DA OBRA<span></span></div>
+  </div>
+
+  <!-- CONTEÚDO DO PASSO -->
+  <div class="step-content" id="step-body"></div>
+
+  <!-- BOTÃO AVANÇAR -->
+  <div style="padding: 0 16px 16px">
+    <button class="btn-primary" id="btn-next" onclick="avancar()" disabled>
+      CONTINUAR →
+    </button>
+  </div>
+
+</div><!-- /screen-steps -->
+
+<!-- Scripts -->
+<script src="storage.js"></script>
+<script src="api.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

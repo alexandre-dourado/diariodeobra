@@ -701,17 +701,12 @@ body {
   margin-bottom: 20px;
 }
 .media-thumb {
-  width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: var(--radius);
   background: var(--grey-card);
 }
-/* Trava de segurança para imagens dinâmicas */
-.step-content img {
-  max-width: 100%;
-  height: auto;
-}
+
 /* ===================== BOTÕES DE AÇÃO ===================== */
 .btn-primary {
   width: 100%;

@@ -1,0 +1,193 @@
+/* Variáveis de Tema (Alto Contraste) */
+:root {
+    --bg-dark: #121212;
+    --sidebar-bg: #1a1a1a;
+    --card-bg: #ffffff;
+    --primary: #FFD600; /* Amarelo Construção */
+    --primary-dark: #B29600;
+    --text-main: #333333;
+    --text-light: #ffffff;
+    --border: #e0e0e0;
+    --danger: #d32f2f;
+    --success: #2e7d32;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-family);
+    background-color: #f4f7f6;
+    color: var(--text-main);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+    background-color: var(--bg-dark);
+}
+
+.sidebar-header h2 { color: var(--primary); font-size: 1.5rem; }
+.sidebar-header p { font-size: 0.8rem; color: #aaa; }
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    padding: 15px 20px;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: #333;
+    border-left: 4px solid var(--primary);
+}
+
+/* ÁREA PRINCIPAL */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.top-header {
+    background-color: var(--card-bg);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.header-title { font-size: 1.2rem; font-weight: bold; }
+
+.content-wrapper { padding: 30px; }
+
+/* UTILITÁRIOS & VIEWS */
+.hidden { display: none !important; }
+.view-section { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--bg-dark);
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.btn-primary:hover { background-color: var(--primary-dark); }
+
+/* DASHBOARD CARDS */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-top: 4px solid var(--bg-dark);
+}
+
+.card h3 { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+.card-value { font-size: 2rem; font-weight: bold; color: var(--bg-dark); }
+
+/* TABELAS */
+.table-container {
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+th { background-color: #f9f9f9; font-weight: 600; color: #555; }
+tr:hover { background-color: #f5f5f5; }
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+}
+.badge.em-analise { background-color: #fff3e0; color: #e65100; }
+.badge.aprovado { background-color: #e8f5e9; color: var(--success); }
+.badge.reincidente { background-color: #ffebee; color: var(--danger); }
+
+/* REGISTROS GRID */
+.registros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+.registro-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid var(--primary);
+}
+.registro-card h4 { margin-bottom: 5px; }
+.registro-card .meta { font-size: 0.8rem; color: #777; margin-bottom: 10px; }
+
+/* OVERLAY LOADING */
+.overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    color: white;
+    font-size: 1.5rem;
+}

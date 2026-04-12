@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel ADMIN - Gestão de Obras</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>ADMIN PRO</h2>
+            <p>Gestão de Obras</p>
+        </div>
+        <nav class="sidebar-nav">
+            <button onclick="navigateTo('dashboard')" class="nav-item active" data-target="dashboard">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </button>
+            <button onclick="navigateTo('obras')" class="nav-item" data-target="obras">
+                <span class="material-symbols-outlined">construction</span> Obras
+            </button>
+            <button onclick="navigateTo('registros')" class="nav-item" data-target="registros">
+                <span class="material-symbols-outlined">list_alt</span> Registros Diários
+            </button>
+            <button onclick="navigateTo('aditivos')" class="nav-item" data-target="aditivos">
+                <span class="material-symbols-outlined">request_quote</span> Aditivos
+            </button>
+            <button onclick="navigateTo('notificacoes')" class="nav-item" data-target="notificacoes">
+                <span class="material-symbols-outlined">notification_important</span> Notificações
+            </button>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title" id="page-title">Dashboard</div>
+            <div class="user-profile">Admin</div>
+        </header>
+
+        <div class="content-wrapper">
+
+            <section id="view-dashboard" class="view-section active">
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Total Obras</h3>
+                        <div class="card-value" id="dash-total-obras">0</div>
+                    </div>
+                    <div class="card">
+                        <h3>Execução Média</h3>
+                        <div class="card-value" id="dash-media-execucao">0%</div>
+                    </div>
+                    <div class="card">
+                        <h3>Aditivos em Análise</h3>
+                        <div class="card-value" id="dash-total-aditivos">0</div>
+                    </div>
+                    <div class="card">
+                        <h3>Notificações (Mês)</h3>
+                        <div class="card-value" id="dash-total-notificacoes">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-obras" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Gestão de Obras</h2>
+                </div>
+                <div class="table-container">
+                    <table id="tabela-obras">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome da Obra</th>
+                                <th>Empresa</th>
+                                <th>% Execução</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="view-registros" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Registros Diários</h2>
+                    
+                    <div class="filters" style="display: flex; gap: 10px; align-items: center;">
+                        <select id="filtro-obra-registros" onchange="carregarRegistros()">
+                            <option value="">Todas as Obras</option>
+                        </select>
+                        
+                        <input type="date" id="filtro-data-registros" onchange="carregarRegistros()">
+                        
+                        <button class="btn-primary" onclick="gerarRelatorioDaDataSelecionada()" style="display: flex; align-items: center; gap: 5px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">print</span> 
+                            IMPRIMIR RELATÓRIO
+                        </button>
+                    </div>
+                    
+                </div>
+                
+                <div class="registros-grid" id="lista-registros">
+                    </div>
+            </section>
+
+            <section id="view-aditivos" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Controle de Aditivos</h2>
+                    <button class="btn-primary" onclick="abrirModalAditivo()">+ Novo Aditivo</button>
+                </div>
+                <div class="table-container">
+                    <table id="tabela-aditivos">
+                        <thead>
+                            <tr>
+                                <th>Data Solicit.</th>
+                                <th>Obra</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="view-notificacoes" class="view-section hidden">
+                <div class="section-header">
+                    <h2>Histórico de Notificações</h2>
+                    <button class="btn-primary" onclick="abrirModalNotificacao()">+ Nova Notificação</button>
+                </div>
+                <div class="table-container">
+                    <table id="tabela-notificacoes">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Obra</th>
+                                <th>Assunto</th>
+                                <th>Reincidência</th>
+                                <th>Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="loading-overlay" class="overlay hidden">
+        <div class="spinner">A carregar...</div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
