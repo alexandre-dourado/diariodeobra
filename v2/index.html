@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Obra Log Pro — Diário de obra para uso em campo">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Obra Log">
+  <link rel="manifest" href="manifest.json">
+  <title>Obra Log Pro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- SYNC BAR -->
+<div class="sync-bar" id="sync-bar"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loader"></div>
+  <div class="loading-msg" id="loading-msg">CARREGANDO...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+<!-- ══════════════════════════════════════
+     TELA HOME
+════════════════════════════════════════ -->
+<div id="screen-home">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-logo">OBRA <em>LOG</em> PRO</div>
+    <div class="header-right">
+      <button class="btn-campo" id="btn-campo" title="Modo campo">☀️ CAMPO</button>
+      <div class="conn-pill online" id="conn-pill">
+        <span class="dot"></span>ONLINE
+      </div>
+    </div>
+  </header>
+
+  <div class="screen-content">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">OBRAS ATIVAS</div>
+        <div class="stat-val" id="stat-obras">00</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-label">ENVIOS PENDENTES</div>
+        <div class="stat-val" id="stat-pending">00</div>
+      </div>
+    </div>
+
+    <!-- BUSCA -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="search" class="search-input" id="search-input"
+             placeholder="Buscar obra...">
+    </div>
+
+    <!-- LISTA -->
+    <div class="obras-list" id="obras-list">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-title">CARREGANDO...</div>
+      </div>
+    </div>
+
+  </div><!-- /screen-content -->
+
+  <!-- FAB -->
+  <button class="btn btn-primary btn-fab" id="btn-registrar">
+    📋 REGISTRAR DIA DE HOJE
+  </button>
+
+</div><!-- /screen-home -->
+
+
+<!-- ══════════════════════════════════════
+     TELA DE FLUXO (REGISTRO)
+════════════════════════════════════════ -->
+<div id="screen-fluxo" style="display:none">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <button class="btn-back" onclick="voltarPasso()">←</button>
+    <div class="header-logo">OBRA <em>LOG</em> PRO</div>
+    <div class="header-right">
+      <div class="conn-pill online" id="conn-pill-fluxo">
+        <span class="dot"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- BANNER DA OBRA -->
+  <div class="obra-banner">
+    <div class="obra-banner-icon">🏗️</div>
+    <div>
+      <div class="obra-banner-nome" id="banner-nome">—</div>
+      <div class="obra-banner-cod"  id="banner-cod">—</div>
+    </div>
+  </div>
+
+  <!-- STEP NAV -->
+  <div class="step-nav">
+    <div class="step-dots" id="step-dots" style="margin-top:28px"></div>
+    <div class="step-info" style="margin-top:14px">
+      <div class="step-titulo" id="step-titulo">—</div>
+      <div class="step-progresso" id="step-progresso">1/5</div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO DA ETAPA -->
+  <div class="screen-content" id="step-body"
+       style="animation: fadeUp 0.2s ease both">
+  </div>
+
+  <!-- BOTÃO CONTINUAR / ENVIAR (fixo) -->
+  <button class="btn btn-primary btn-fab" id="btn-next"
+          onclick="avancar()" disabled>
+    CONTINUAR →
+  </button>
+
+</div><!-- /screen-fluxo -->
+
+
+<script src="storage.js"></script>
+<script src="api.js"></script>
+<script src="app.js"></script>
+
+<script>
+  // Sincroniza o segundo conn-pill (no fluxo) com o primeiro
+  const obs = new MutationObserver(() => {
+    const src  = document.getElementById('conn-pill');
+    const dest = document.getElementById('conn-pill-fluxo');
+    if (src && dest) {
+      dest.className = src.className;
+      dest.innerHTML = src.innerHTML;
+    }
+  });
+  const src = document.getElementById('conn-pill');
+  if (src) obs.observe(src, { attributes: true, childList: true, subtree: true });
+</script>
+
+</body>
+</html>

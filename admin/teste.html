@@ -3,154 +3,421 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ObraLog Pro - Design Exploration</title>
+    <title>ObraLog Pro - Operacional</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Inter:wght@400;500;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgMain: '#0F172A',
+                        card: '#1E293B',
+                        textMain: '#F1F5F9',
+                        textMuted: '#94A3B8',
+                        primary: '#F59E0B',
+                        success: '#22C55E',
+                        error: '#EF4444',
+                        warning: '#EAB308'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
+        body { background-color: #0F172A; color: #F1F5F9; }
         .hidden-view { display: none !important; }
-        .tab-active { border-bottom: 3px solid currentColor; font-weight: 800; }
         
-        /* Estilo 1: Dark Glassmorphism */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Botões padronizados (Mínimo 48px de altura) */
+        .btn-primary {
+            background-color: #F59E0B;
+            color: #ffffff;
+            height: 48px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:active { background-color: #D97706; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-secondary {
+            background-color: #1E293B;
+            border: 1px solid #334155;
+            color: #F1F5F9;
+            height: 48px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-secondary:active { background-color: #334155; }
+
+        /* Inputs padronizados */
+        .input-dark {
+            background-color: #0F172A;
+            border: 1px solid #334155;
+            color: #F1F5F9;
+            height: 48px;
+            border-radius: 8px;
+            padding: 0 16px;
+            width: 100%;
+            outline: none;
+        }
+        .input-dark:focus { border-color: #F59E0B; }
+
+        /* Slider de Progresso Industrial */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 12px;
+            background: #334155;
+            border-radius: 6px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 32px;
+            height: 32px;
+            background: #F59E0B;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 4px solid #1E293B;
         }
 
-        /* Estilo 2: Soft Industrial (Warm) */
-        .soft-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
-
-        /* Estilo 3: Bento Modern (Apple-esque) */
-        .bento-card { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .bento-card:active { transform: scale(0.96); }
+        /* Step Nav Visual */
+        .step-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #1E293B;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            border: 2px solid #334155;
+        }
+        .step-circle.active { background-color: #F59E0B; border-color: #F59E0B; color: white; }
+        .step-circle.completed { background-color: #22C55E; border-color: #22C55E; color: #0F172A; }
+        .step-line { flex: 1; height: 2px; background-color: #334155; }
+        .step-line.completed { background-color: #22C55E; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="antialiased pb-24 selection:bg-primary selection:text-white">
 
-    <nav class="fixed top-0 w-full z-50 bg-white border-b flex justify-around text-[10px] uppercase tracking-widest font-bold">
-        <button onclick="switchStyle('style-dark')" id="btn-dark" class="py-4 px-2 text-slate-900 tab-active">01. Dark Tech</button>
-        <button onclick="switchStyle('style-warm')" id="btn-warm" class="py-4 px-2 text-orange-700">02. Warm Industrial</button>
-        <button onclick="switchStyle('style-bento')" id="btn-bento" class="py-4 px-2 text-blue-600">03. Bento Modern</button>
-    </nav>
+    <header class="fixed top-0 w-full z-50 bg-bgMain border-b border-[#334155] px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button id="btn-back-global" onclick="goHome()" class="text-textMuted hidden">
+                <span class="material-symbols-outlined text-2xl">arrow_back</span>
+            </button>
+            <div>
+                <h1 id="header-title" class="font-bold text-lg leading-tight">ObraLog Pro</h1>
+                <p id="header-subtitle" class="text-xs text-textMuted font-medium">Sistema Operacional</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 bg-[#1E293B] px-2 py-1 rounded">
+            <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+            <span class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Online</span>
+        </div>
+    </header>
 
-    <main id="style-dark" class="style-container min-h-screen bg-slate-950 text-white pt-16 pb-20">
-        <div class="px-6 py-8">
-            <h1 class="font-['Outfit'] text-3xl font-black leading-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-                BOM DIA, ALEXANDRE.<br><span class="text-white text-xl font-light">QUAL OBRA VAMOS REGISTRAR?</span>
-            </h1>
+    <main class="pt-20 px-4 max-w-md mx-auto">
+
+        <section id="view-home" class="view-section">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">Painel de Obras</h2>
+                <p class="text-textMuted text-sm">Selecione o local de operação</p>
+            </div>
+
+            <div class="space-y-4">
+                <div onclick="startFlow('UBS Canelas')" class="bg-card p-4 rounded-lg border border-[#334155] active:bg-[#334155] transition-colors cursor-pointer">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold text-bgMain bg-primary px-2 py-1 rounded">MOC-01</span>
+                        <span class="text-sm font-bold text-success">85% Concluído</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">UBS Canelas</h3>
+                    <p class="text-sm text-textMuted flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">location_on</span> Sec. de Saúde
+                    </p>
+                </div>
+
+                <div onclick="startFlow('Hospital Municipal')" class="bg-card p-4 rounded-lg border border-[#334155] active:bg-[#334155] transition-colors cursor-pointer">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold text-textMuted bg-[#0F172A] border border-[#334155] px-2 py-1 rounded">MOC-02</span>
+                        <span class="text-sm font-bold text-warning">40% Concluído</span>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">Hospital Municipal</h3>
+                    <p class="text-sm text-textMuted flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">location_on</span> Prefeitura
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div id="wizard-container" class="hidden-view">
             
-            <div class="space-y-4 mt-8">
-                <div class="glass-card p-4 rounded-3xl flex items-center gap-4">
-                    <div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10">
-                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=200" class="w-full h-full object-cover">
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg">Hospital Municipal</h3>
-                        <p class="text-xs text-slate-400">Montes Claros • MG</p>
-                        <div class="mt-2 w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div class="w-[65%] h-full bg-blue-500"></div>
-                        </div>
-                    </div>
+            <div class="flex items-center justify-between mb-8 px-2">
+                <div class="step-circle" id="nav-1">1</div>
+                <div class="step-line" id="line-1"></div>
+                <div class="step-circle" id="nav-2">2</div>
+                <div class="step-line" id="line-2"></div>
+                <div class="step-circle" id="nav-3">3</div>
+                <div class="step-line" id="line-3"></div>
+                <div class="step-circle" id="nav-4">4</div>
+                <div class="step-line" id="line-4"></div>
+                <div class="step-circle" id="nav-5">5</div>
+                <div class="step-line" id="line-5"></div>
+                <div class="step-circle" id="nav-6">6</div>
+            </div>
+
+            <section id="step-1" class="step-view hidden-view">
+                <h2 class="text-xl font-bold mb-1">Captura Fotográfica</h2>
+                <p class="text-sm text-textMuted mb-6">Registre a situação atual da obra.</p>
+
+                <div class="w-full min-h-[240px] bg-card border-2 border-dashed border-[#334155] rounded-lg flex flex-col items-center justify-center gap-3 mb-8 active:bg-[#334155] cursor-pointer">
+                    <span class="material-symbols-outlined text-5xl text-textMuted">add_a_photo</span>
+                    <span class="font-semibold text-textMuted">Tocar para Câmera</span>
                 </div>
 
-                <div class="glass-card p-4 rounded-3xl flex items-center gap-4 opacity-70">
-                    <div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-white/10">
-                        <img src="https://images.unsplash.com/photo-1503387762-5929ef08343a?auto=format&fit=crop&w=200" class="w-full h-full object-cover">
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg">UBS Canelas</h3>
-                        <p class="text-xs text-slate-400">Montes Claros • MG</p>
-                    </div>
+                <button onclick="goToStep(2)" class="btn-primary w-full">Confirmar Foto</button>
+            </section>
+
+            <section id="step-2" class="step-view hidden-view">
+                <h2 class="text-xl font-bold mb-1">Atividade Principal</h2>
+                <p class="text-sm text-textMuted mb-6">O que está sendo executado hoje?</p>
+
+                <div class="grid grid-cols-2 gap-3 mb-8">
+                    <button class="bg-[#334155] border-2 border-primary text-white h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
+                        <span class="material-symbols-outlined">foundation</span>
+                        Concretagem
+                    </button>
+                    <button class="bg-card border border-[#334155] text-textMuted h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
+                        <span class="material-symbols-outlined">domain</span>
+                        Alvenaria
+                    </button>
+                    <button class="bg-card border border-[#334155] text-textMuted h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
+                        <span class="material-symbols-outlined">format_paint</span>
+                        Acabamento
+                    </button>
+                    <button class="bg-card border border-[#334155] text-textMuted h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
+                        <span class="material-symbols-outlined">electrical_services</span>
+                        Instalações
+                    </button>
                 </div>
-            </div>
-        </div>
-    </main>
 
-    <main id="style-warm" class="style-container min-h-screen bg-[#FAF9F6] text-[#2D2926] pt-16 pb-20 hidden-view">
-        <div class="px-6 py-8">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="w-8 h-px bg-orange-600"></span>
-                <span class="text-orange-600 font-bold text-xs uppercase tracking-widest">Diário de Campo</span>
-            </div>
-            <h1 class="font-['Jakarta_Sans'] text-4xl font-extrabold tracking-tight mb-8">
-                Bom dia, Alexandre. <br><span class="text-gray-400 font-medium text-2xl">Pronto para o registro?</span>
-            </h1>
-
-            <div class="grid gap-6">
-                <div class="bg-white p-2 rounded-[2rem] soft-shadow">
-                    <div class="relative h-48 rounded-[1.8rem] overflow-hidden mb-4">
-                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=500" class="w-full h-full object-cover">
-                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl font-bold text-sm">
-                            65% Concluído
-                        </div>
-                    </div>
-                    <div class="px-4 pb-4">
-                        <h3 class="text-xl font-bold">Hospital Municipal</h3>
-                        <p class="text-gray-500 text-sm">Rua Final • Montes Claros</p>
-                    </div>
+                <div class="flex gap-3">
+                    <button onclick="goToStep(1)" class="btn-secondary w-1/3">Voltar</button>
+                    <button onclick="goToStep(3)" class="btn-primary w-2/3">Avançar</button>
                 </div>
-            </div>
-        </div>
-    </main>
+            </section>
 
-    <main id="style-bento" class="style-container min-h-screen bg-[#F2F2F7] text-black pt-16 pb-20 hidden-view">
-        <div class="px-6 py-8">
-            <h1 class="font-['Outfit'] text-3xl font-extrabold mb-8">
-                Bom dia, <span class="text-blue-600">Alexandre.</span><br>
-                Qual obra registrar?
-            </h1>
+            <section id="step-3" class="step-view hidden-view">
+                <h2 class="text-xl font-bold mb-1">Condição Climática</h2>
+                <p class="text-sm text-textMuted mb-6">Crucial para controle de aditivos.</p>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2 bento-card bg-white p-5 rounded-[2.5rem] flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100">
-                            <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=200" class="w-full h-full object-cover">
-                        </div>
+                <button class="btn-primary w-full mb-6">
+                    <span class="material-symbols-outlined">satellite_alt</span>
+                    Detectar Automaticamente (GPS)
+                </button>
+
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <button class="bg-card border border-[#334155] text-textMuted py-4 rounded-lg flex flex-col items-center gap-1">
+                        <span class="material-symbols-outlined">light_mode</span> Sol
+                    </button>
+                    <button class="bg-[#334155] border-2 border-primary text-white py-4 rounded-lg flex flex-col items-center gap-1">
+                        <span class="material-symbols-outlined">cloud</span> Nublado
+                    </button>
+                    <button class="bg-card border border-[#334155] text-textMuted py-4 rounded-lg flex flex-col items-center gap-1">
+                        <span class="material-symbols-outlined">rainy</span> Chuva
+                    </button>
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                    <button onclick="goToStep(2)" class="btn-secondary w-1/3">Voltar</button>
+                    <button onclick="goToStep(4)" class="btn-primary w-2/3">Avançar</button>
+                </div>
+            </section>
+
+            <section id="step-4" class="step-view hidden-view">
+                <h2 class="text-xl font-bold mb-1">Efetivo de Campo</h2>
+                <p class="text-sm text-textMuted mb-6">Registre os profissionais ativos hoje.</p>
+
+                <div class="flex gap-2 mb-6">
+                    <input type="text" placeholder="Nome do operário" class="input-dark w-[50%]">
+                    <select class="input-dark w-[35%]">
+                        <option>Pedreiro</option>
+                        <option>Servente</option>
+                        <option>Mestre</option>
+                    </select>
+                    <button class="bg-primary text-bgMain w-[15%] h-12 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined font-bold">add</span>
+                    </button>
+                </div>
+
+                <div class="space-y-2 mb-8">
+                    <div class="bg-card border border-[#334155] p-3 rounded-lg flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold">Hospital Municipal</h3>
-                            <span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase">Ativo</span>
+                            <p class="font-bold">Carlos Mestre</p>
+                            <p class="text-xs text-textMuted">Mestre de Obras</p>
                         </div>
+                        <button class="text-error bg-error/10 p-2 rounded"><span class="material-symbols-outlined text-sm">delete</span></button>
                     </div>
-                    <span class="material-symbols-outlined text-gray-300">arrow_forward_ios</span>
+                    <div class="bg-card border border-[#334155] p-3 rounded-lg flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">João Silva</p>
+                            <p class="text-xs text-textMuted">Pedreiro</p>
+                        </div>
+                        <button class="text-error bg-error/10 p-2 rounded"><span class="material-symbols-outlined text-sm">delete</span></button>
+                    </div>
                 </div>
 
-                <div class="bento-card bg-white p-5 rounded-[2.5rem] flex flex-col items-center text-center">
-                    <div class="w-full h-24 rounded-2xl overflow-hidden mb-3">
-                         <img src="https://images.unsplash.com/photo-1503387762-5929ef08343a?auto=format&fit=crop&w=200" class="w-full h-full object-cover">
-                    </div>
-                    <h3 class="font-bold text-sm">UBS Canelas</h3>
+                <div class="flex gap-3">
+                    <button onclick="goToStep(3)" class="btn-secondary w-1/3">Voltar</button>
+                    <button onclick="goToStep(5)" class="btn-primary w-2/3">Avançar</button>
+                </div>
+            </section>
+
+            <section id="step-5" class="step-view hidden-view">
+                <h2 class="text-xl font-bold mb-1">Avanço e Medição</h2>
+                <p class="text-sm text-textMuted mb-6">Qual o status físico gerado?</p>
+
+                <div class="bg-card border border-[#334155] p-4 rounded-lg mb-6">
+                    <label class="text-xs font-bold text-textMuted uppercase mb-2 block">Medição Executada (Opcional)</label>
+                    <input type="text" placeholder="Ex: 45 m³ de concreto" class="input-dark">
                 </div>
 
-                <div class="bento-card bg-blue-600 p-5 rounded-[2.5rem] flex flex-col items-center justify-center text-white">
-                    <span class="material-symbols-outlined text-4xl mb-1">add_circle</span>
-                    <span class="text-xs font-bold uppercase tracking-widest">Nova Obra</span>
+                <div class="bg-card border border-[#334155] p-6 rounded-lg mb-8 text-center">
+                    <label class="text-xs font-bold text-textMuted uppercase mb-4 block">Avanço Global da Obra</label>
+                    <span class="text-5xl font-bold text-primary block mb-6">65%</span>
+                    <input type="range" min="0" max="100" value="65">
                 </div>
-            </div>
+
+                <div class="flex gap-3">
+                    <button onclick="goToStep(4)" class="btn-secondary w-1/3">Voltar</button>
+                    <button onclick="goToStep(6)" class="btn-primary w-2/3">Avançar</button>
+                </div>
+            </section>
+
+            <section id="step-6" class="step-view hidden-view">
+                <h2 class="text-xl font-bold mb-1">Revisão Final</h2>
+                <p class="text-sm text-textMuted mb-6">Valide os dados antes de assinar.</p>
+
+                <div class="bg-card border border-[#334155] rounded-lg p-4 mb-8">
+                    <div class="flex justify-between border-b border-[#334155] pb-3 mb-3">
+                        <span class="text-textMuted text-sm">Obra</span>
+                        <span class="font-bold text-right" id="resumo-obra">UBS Canelas</span>
+                    </div>
+                    <div class="flex justify-between border-b border-[#334155] pb-3 mb-3">
+                        <span class="text-textMuted text-sm">Atividade</span>
+                        <span class="font-bold text-right">Concretagem</span>
+                    </div>
+                    <div class="flex justify-between border-b border-[#334155] pb-3 mb-3">
+                        <span class="text-textMuted text-sm">Clima</span>
+                        <span class="font-bold text-right">Nublado</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-textMuted text-sm">Avanço Final</span>
+                        <span class="font-bold text-primary text-xl">65%</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="goToStep(5)" class="btn-secondary w-1/3">Voltar</button>
+                    <button id="btn-sync" onclick="simulateSync()" class="btn-primary w-2/3">
+                        <span class="material-symbols-outlined">cloud_upload</span> Sincronizar
+                    </button>
+                </div>
+            </section>
+
         </div>
     </main>
 
-    <nav class="fixed bottom-0 w-full bg-white/80 backdrop-blur-md border-t h-20 flex justify-around items-center px-10">
-        <span class="material-symbols-outlined text-gray-400">home</span>
-        <div class="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white shadow-lg">
-            <span class="material-symbols-outlined">add</span>
-        </div>
-        <span class="material-symbols-outlined text-gray-400">person</span>
+    <nav class="fixed bottom-0 w-full bg-card border-t border-[#334155] flex justify-around items-center py-2 z-40">
+        <button onclick="goHome()" class="flex flex-col items-center p-2 text-primary">
+            <span class="material-symbols-outlined">home</span>
+            <span class="text-[10px] font-bold mt-1">Painel</span>
+        </button>
+        <button class="flex flex-col items-center p-2 text-textMuted hover:text-textMain">
+            <span class="material-symbols-outlined">description</span>
+            <span class="text-[10px] font-bold mt-1">Relatórios</span>
+        </button>
+        <button class="flex flex-col items-center p-2 text-textMuted hover:text-textMain">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="text-[10px] font-bold mt-1">Ajustes</span>
+        </button>
     </nav>
 
     <script>
-        function switchStyle(styleId) {
-            // Esconder todos
-            document.querySelectorAll('.style-container').forEach(el => el.classList.add('hidden-view'));
-            // Mostrar selecionado
-            document.getElementById(styleId).classList.remove('hidden-view');
+        // Lógica simples para demonstração visual das telas
+        function startFlow(obraName) {
+            document.getElementById('view-home').classList.add('hidden-view');
+            document.getElementById('wizard-container').classList.remove('hidden-view');
+            document.getElementById('header-subtitle').innerText = obraName;
+            document.getElementById('resumo-obra').innerText = obraName;
+            document.getElementById('btn-back-global').classList.remove('hidden');
+            goToStep(1);
+        }
+
+        function goHome() {
+            document.getElementById('wizard-container').classList.add('hidden-view');
+            document.getElementById('view-home').classList.remove('hidden-view');
+            document.getElementById('header-subtitle').innerText = "Sistema Operacional";
+            document.getElementById('btn-back-global').classList.add('hidden');
+        }
+
+        function goToStep(step) {
+            // Esconde todos
+            document.querySelectorAll('.step-view').forEach(el => el.classList.add('hidden-view'));
+            // Mostra atual
+            document.getElementById(`step-${step}`).classList.remove('hidden-view');
+            window.scrollTo(0,0);
+
+            // Atualiza Top Nav
+            for(let i=1; i<=6; i++) {
+                let circle = document.getElementById(`nav-${i}`);
+                let line = document.getElementById(`line-${i}`);
+                
+                circle.classList.remove('active', 'completed');
+                if(line) line.classList.remove('completed');
+
+                if(i < step) {
+                    circle.classList.add('completed');
+                    circle.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span>';
+                    if(line) line.classList.add('completed');
+                } else if(i === step) {
+                    circle.classList.add('active');
+                    circle.innerHTML = i;
+                } else {
+                    circle.innerHTML = i;
+                }
+            }
+        }
+
+        function simulateSync() {
+            const btn = document.getElementById('btn-sync');
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processando...';
+            btn.disabled = true;
             
-            // Atualizar botões
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('tab-active'));
-            if(styleId === 'style-dark') document.getElementById('btn-dark').classList.add('tab-active');
-            if(styleId === 'style-warm') document.getElementById('btn-warm').classList.add('tab-active');
-            if(styleId === 'style-bento') document.getElementById('btn-bento').classList.add('tab-active');
+            setTimeout(() => {
+                btn.classList.remove('bg-primary');
+                btn.classList.add('bg-success');
+                btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Enviado!';
+                setTimeout(() => goHome(), 1500);
+            }, 1500);
         }
     </script>
 </body>

@@ -1,9 +1,9 @@
-**APRESENTAÇÃO EXECUTIVA E PORTFÓLIO: SITE LOG PRO**
+**APRESENTAÇÃO EXECUTIVA E PORTFÓLIO: ObraLog PRO**
 
 ---
 
 ### 1. NOME DO PROJETO
-**Nome Atual:** Site Log Pro 
+**Nome Atual:** ObraLog Pro 
 **Sugestões de Rebranding:** * **Canteiro Inteligente** (Foco no mercado brasileiro e facilidade)
 * **SmartSite** (Foco em modernidade e escalabilidade)
 * **ObraSync** (Foco na funcionalidade principal de manter dados sincronizados)
@@ -25,7 +25,7 @@ A gestão diária de obras civis enfrenta desafios críticos que custam tempo e 
 ---
 
 ### 4. A SOLUÇÃO
-O **Site Log Pro** é um aplicativo móvel de alta performance projetado para o engenheiro de campo, integrado a um painel de controle administrativo para os gestores.
+O **ObraLog Pro** é um aplicativo móvel de alta performance projetado para o engenheiro de campo, integrado a um painel de controle administrativo para os gestores.
 * **Como resolve:** Ele digitaliza o preenchimento do diário de obra com um fluxo em 6 passos simples, permitindo a inclusão de fotos, registro de equipe e avanço físico em segundos.
 * **O Grande Diferencial:** Funciona 100% offline e possui auditoria climática automatizada via satélite. Se chover, o sistema registra por GPS a condição climática exata, criando um escudo jurídico para a construtora.
 
@@ -78,7 +78,7 @@ O sistema utiliza o que há de mais moderno em eficiência web:
 ---
 
 ### 11. FRASE DE IMPACTO (Slogan)
-> *"Site Log Pro: Onde o papel termina, o controle da obra começa."*
+> *"ObraLog Pro: Onde o papel termina, o controle da obra começa."*
 > 
 > Alternativa: *"Construa com dados. Entregue com precisão."*
 
