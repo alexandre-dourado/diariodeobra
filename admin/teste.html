@@ -1,424 +1,379 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ObraLog Pro - Operacional</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Análise - 11ª CMS Montes Claros</title>
+<link href="https://fonts.googleapis.com/css2?family=Georama:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   TOKENS DO BRAND GUIDE — 11ª CMS MONTES CLAROS
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --azul-sus:        #1A5EA8;
+  --azul-medio:      #2E8BC0;
+  --azul-claro:      #7EC8E3;
+  --azul-wave:       #0D3D6B;
+  --verde-sus:       #3AAA35;
+  --verde-wave:      #5BBF6A;
+  --amarelo-brasil:  #F5C800;
+  --branco-puro:     #FFFFFF;
+  --cinza-off:       #F4F7FB;
+  --cinza-texto:     #2C3E50;
+  --cinza-medio:     #6B7F96;
+  --cinza-borda:     #D6E4F0;
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        bgMain: '#0F172A',
-                        card: '#1E293B',
-                        textMain: '#F1F5F9',
-                        textMuted: '#94A3B8',
-                        primary: '#F59E0B',
-                        success: '#22C55E',
-                        error: '#EF4444',
-                        warning: '#EAB308'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+  --gradient-wave: linear-gradient(135deg, #1A5EA8 0%, #2E8BC0 40%, #5BBF6A 75%, #F5C800 100%);
+  
+  --font: 'Georama', sans-serif;
+  
+  --sombra-card:    0 4px 24px rgba(26,94,168,.10), 0 1px 4px rgba(26,94,168,.06);
+  --sombra-hover:   0 12px 40px rgba(26,94,168,.18), 0 2px 8px rgba(26,94,168,.10);
+  
+  --radius:   14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+}
 
-    <style>
-        body { background-color: #0F172A; color: #F1F5F9; }
-        .hidden-view { display: none !important; }
-        
-        /* Botões padronizados (Mínimo 48px de altura) */
-        .btn-primary {
-            background-color: #F59E0B;
-            color: #ffffff;
-            height: 48px;
-            border-radius: 8px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-        }
-        .btn-primary:active { background-color: #D97706; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--cinza-off);
+  color: var(--cinza-texto);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+}
 
-        .btn-secondary {
-            background-color: #1E293B;
-            border: 1px solid #334155;
-            color: #F1F5F9;
-            height: 48px;
-            border-radius: 8px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn-secondary:active { background-color: #334155; }
+/* ── HEADER (DNA VISUAL) ── */
+.report-header {
+  background: linear-gradient(135deg, var(--azul-wave) 0%, var(--azul-sus) 60%, var(--azul-medio) 100%);
+  padding: 48px 40px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.report-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60'%3E%3Cpath fill='%23F4F7FB' d='M0,60 C480,10 960,50 1440,0 L1440,60 Z'/%3E%3C/svg%3E") no-repeat bottom;
+  background-size: cover;
+}
+.header-inner { max-width: 1024px; margin: 0 auto; position: relative; z-index: 1; }
+.badge-top {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+  color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; padding: 5px 14px; border-radius: var(--radius-pill);
+  margin-bottom: 20px;
+}
+.badge-top::before {
+  content: ''; width: 6px; height: 6px; background: var(--amarelo-brasil); border-radius: 50%;
+}
+.header-title {
+  font-size: clamp(28px, 4vw, 42px); font-weight: 800; color: #fff;
+  line-height: 1.1; letter-spacing: -.02em; margin-bottom: 12px;
+}
+.header-title span { color: var(--amarelo-brasil); }
+.header-subtitle { color: rgba(255,255,255,.75); font-size: 16px; font-weight: 400; max-width: 600px; }
 
-        /* Inputs padronizados */
-        .input-dark {
-            background-color: #0F172A;
-            border: 1px solid #334155;
-            color: #F1F5F9;
-            height: 48px;
-            border-radius: 8px;
-            padding: 0 16px;
-            width: 100%;
-            outline: none;
-        }
-        .input-dark:focus { border-color: #F59E0B; }
+/* ── LAYOUT & GRIDS ── */
+.container { max-width: 1024px; margin: -30px auto 80px; padding: 0 40px; position: relative; z-index: 10; }
+.section-title {
+  font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--azul-sus); margin: 40px 0 20px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::before {
+  content: ''; width: 24px; height: 3px; background: var(--gradient-wave); border-radius: 2px;
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 
-        /* Slider de Progresso Industrial */
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 12px;
-            background: #334155;
-            border-radius: 6px;
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 32px;
-            height: 32px;
-            background: #F59E0B;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 4px solid #1E293B;
-        }
+/* ── CARDS PADRÃO ── */
+.card {
+  background: #fff; border-radius: var(--radius); box-shadow: var(--sombra-card);
+  border: 1.5px solid var(--cinza-borda); overflow: hidden; position: relative;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.card:hover { transform: translateY(-4px); box-shadow: var(--sombra-hover); }
+.card-top-bar { height: 6px; background: var(--gradient-wave); }
+.card-body { padding: 24px; }
+.card-body.synthesis { font-size: 16px; color: var(--cinza-texto); font-weight: 500; }
+.card-body.synthesis strong { color: var(--azul-sus); font-weight: 800; }
+.insight-tag {
+  display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
 
-        /* Step Nav Visual */
-        .step-circle {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background-color: #1E293B;
-            color: #94A3B8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            border: 2px solid #334155;
-        }
-        .step-circle.active { background-color: #F59E0B; border-color: #F59E0B; color: white; }
-        .step-circle.completed { background-color: #22C55E; border-color: #22C55E; color: #0F172A; }
-        .step-line { flex: 1; height: 2px; background-color: #334155; }
-        .step-line.completed { background-color: #22C55E; }
-    </style>
+/* ── DATA VISUALIZATION (CSS PURO) ── */
+.metric-box { text-align: center; padding: 16px; background: var(--cinza-off); border-radius: var(--radius-sm); }
+.metric-value { font-size: 32px; font-weight: 900; color: var(--azul-sus); line-height: 1; margin-bottom: 4px; }
+.metric-value span { font-size: 16px; color: var(--cinza-medio); font-weight: 600; }
+.metric-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--cinza-medio); letter-spacing: .08em; }
+
+/* Barras Horizontais */
+.bar-chart { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-name { width: 90px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--cinza-texto); }
+.bar-track { flex: 1; height: 10px; background: var(--cinza-borda); border-radius: var(--radius-pill); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: var(--radius-pill); }
+.bar-num { width: 30px; font-size: 13px; font-weight: 800; color: var(--azul-sus); text-align: right; }
+
+/* Progressão Única */
+.progress-wrap { margin-top: 16px; }
+.progress-track { width: 100%; height: 12px; background: var(--cinza-borda); border-radius: var(--radius-pill); overflow: hidden; display: flex; }
+.progress-segment { height: 100%; }
+
+/* Score Horizontal */
+.score-flex { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--cinza-borda); padding-bottom: 16px; margin-bottom: 16px; }
+.score-info h4 { font-size: 14px; font-weight: 800; color: var(--cinza-texto); margin-bottom: 4px; }
+.score-info p { font-size: 12px; color: var(--cinza-medio); }
+.score-badge {
+  background: #E8F4FD; color: var(--azul-sus); font-size: 18px; font-weight: 900;
+  padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid #B8D4E8;
+}
+
+/* ── LISTAS & HIGHLIGHTS ── */
+.highlight-list { list-style: none; }
+.highlight-list li {
+  position: relative; padding-left: 24px; margin-bottom: 12px; font-size: 14px; color: var(--cinza-texto); font-weight: 500;
+}
+.highlight-list li::before {
+  content: '✓'; position: absolute; left: 0; top: 0; color: var(--verde-sus); font-weight: 900; font-size: 14px;
+}
+.highlight-list.neg li::before { content: '⚠️'; color: var(--amarelo-brasil); }
+
+.kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.kanban-col { background: #fff; border: 1px solid var(--cinza-borda); border-radius: var(--radius); padding: 20px; }
+.kanban-header { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--azul-sus); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1.5px solid var(--cinza-borda); }
+.kanban-item { background: var(--cinza-off); padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--cinza-texto); margin-bottom: 8px; border-left: 3px solid var(--azul-medio); }
+.kanban-item.med { border-left-color: var(--amarelo-brasil); }
+.kanban-item.long { border-left-color: var(--verde-sus); }
+
+/* ── RESPONSIVIDADE ── */
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4, .kanban-board { grid-template-columns: 1fr; }
+  .container { padding: 0 20px; }
+  .report-header { padding: 40px 20px 60px; }
+}
+
+footer { text-align: center; padding: 40px 20px; font-size: 12px; color: var(--cinza-medio); font-weight: 600; }
+</style>
 </head>
-<body class="antialiased pb-24 selection:bg-primary selection:text-white">
+<body>
 
-    <header class="fixed top-0 w-full z-50 bg-bgMain border-b border-[#334155] px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <button id="btn-back-global" onclick="goHome()" class="text-textMuted hidden">
-                <span class="material-symbols-outlined text-2xl">arrow_back</span>
-            </button>
-            <div>
-                <h1 id="header-title" class="font-bold text-lg leading-tight">ObraLog Pro</h1>
-                <p id="header-subtitle" class="text-xs text-textMuted font-medium">Sistema Operacional</p>
-            </div>
+<div class="report-header">
+  <div class="header-inner">
+    <div class="badge-top">Total de Respostas Analisadas: 50</div>
+    <h1 class="header-title">Relatório de <span>Análise</span></h1>
+    <p class="header-subtitle">Avaliação de Participação e Qualidade da Experiência da 11ª Conferência Municipal de Saúde de Montes Claros.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card" style="margin-bottom: 40px;">
+    <div class="card-top-bar"></div>
+    <div class="card-body synthesis">
+      <div class="grid-2" style="align-items: center;">
+        <div>
+          <h2 style="font-size: 18px; color: var(--azul-wave); margin-bottom: 12px; font-weight: 800;">Síntese Executiva</h2>
+          <p>A avaliação geral da conferência é positiva e consistente. Observa-se uma <strong>alta aprovação da organização e metodologia</strong>, além de uma percepção forte de ambiente democrático e clareza informacional prévia.</p>
+          <br>
+          <p style="padding: 16px; background: #E8F8EC; border-left: 4px solid var(--verde-sus); border-radius: 4px; font-size: 14px; color: #1B7A30;">
+            <strong>Maturidade Institucional:</strong> O evento demonstra um nível intermediário-alto, com oportunidades claras de evolução qualitativa focadas em acessibilidade e aprofundamento técnico.
+          </p>
         </div>
-        <div class="flex items-center gap-2 bg-[#1E293B] px-2 py-1 rounded">
-            <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-            <span class="text-[10px] font-bold text-textMuted uppercase tracking-wider">Online</span>
+        <div class="grid-2">
+          <div class="metric-box">
+            <div class="metric-value">4,16<span>/5</span></div>
+            <div class="metric-label">Média Geral Consolidada</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value" style="color: var(--verde-sus);">94%</div>
+            <div class="metric-label">Percepção Democrática</div>
+          </div>
         </div>
-    </header>
+      </div>
+    </div>
+  </div>
 
-    <main class="pt-20 px-4 max-w-md mx-auto">
-
-        <section id="view-home" class="view-section">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold">Painel de Obras</h2>
-                <p class="text-textMuted text-sm">Selecione o local de operação</p>
-            </div>
-
-            <div class="space-y-4">
-                <div onclick="startFlow('UBS Canelas')" class="bg-card p-4 rounded-lg border border-[#334155] active:bg-[#334155] transition-colors cursor-pointer">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-bgMain bg-primary px-2 py-1 rounded">MOC-01</span>
-                        <span class="text-sm font-bold text-success">85% Concluído</span>
-                    </div>
-                    <h3 class="font-bold text-lg mb-1">UBS Canelas</h3>
-                    <p class="text-sm text-textMuted flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">location_on</span> Sec. de Saúde
-                    </p>
-                </div>
-
-                <div onclick="startFlow('Hospital Municipal')" class="bg-card p-4 rounded-lg border border-[#334155] active:bg-[#334155] transition-colors cursor-pointer">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-bold text-textMuted bg-[#0F172A] border border-[#334155] px-2 py-1 rounded">MOC-02</span>
-                        <span class="text-sm font-bold text-warning">40% Concluído</span>
-                    </div>
-                    <h3 class="font-bold text-lg mb-1">Hospital Municipal</h3>
-                    <p class="text-sm text-textMuted flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">location_on</span> Prefeitura
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <div id="wizard-container" class="hidden-view">
-            
-            <div class="flex items-center justify-between mb-8 px-2">
-                <div class="step-circle" id="nav-1">1</div>
-                <div class="step-line" id="line-1"></div>
-                <div class="step-circle" id="nav-2">2</div>
-                <div class="step-line" id="line-2"></div>
-                <div class="step-circle" id="nav-3">3</div>
-                <div class="step-line" id="line-3"></div>
-                <div class="step-circle" id="nav-4">4</div>
-                <div class="step-line" id="line-4"></div>
-                <div class="step-circle" id="nav-5">5</div>
-                <div class="step-line" id="line-5"></div>
-                <div class="step-circle" id="nav-6">6</div>
-            </div>
-
-            <section id="step-1" class="step-view hidden-view">
-                <h2 class="text-xl font-bold mb-1">Captura Fotográfica</h2>
-                <p class="text-sm text-textMuted mb-6">Registre a situação atual da obra.</p>
-
-                <div class="w-full min-h-[240px] bg-card border-2 border-dashed border-[#334155] rounded-lg flex flex-col items-center justify-center gap-3 mb-8 active:bg-[#334155] cursor-pointer">
-                    <span class="material-symbols-outlined text-5xl text-textMuted">add_a_photo</span>
-                    <span class="font-semibold text-textMuted">Tocar para Câmera</span>
-                </div>
-
-                <button onclick="goToStep(2)" class="btn-primary w-full">Confirmar Foto</button>
-            </section>
-
-            <section id="step-2" class="step-view hidden-view">
-                <h2 class="text-xl font-bold mb-1">Atividade Principal</h2>
-                <p class="text-sm text-textMuted mb-6">O que está sendo executado hoje?</p>
-
-                <div class="grid grid-cols-2 gap-3 mb-8">
-                    <button class="bg-[#334155] border-2 border-primary text-white h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
-                        <span class="material-symbols-outlined">foundation</span>
-                        Concretagem
-                    </button>
-                    <button class="bg-card border border-[#334155] text-textMuted h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
-                        <span class="material-symbols-outlined">domain</span>
-                        Alvenaria
-                    </button>
-                    <button class="bg-card border border-[#334155] text-textMuted h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
-                        <span class="material-symbols-outlined">format_paint</span>
-                        Acabamento
-                    </button>
-                    <button class="bg-card border border-[#334155] text-textMuted h-20 rounded-lg font-semibold flex flex-col items-center justify-center gap-1">
-                        <span class="material-symbols-outlined">electrical_services</span>
-                        Instalações
-                    </button>
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="goToStep(1)" class="btn-secondary w-1/3">Voltar</button>
-                    <button onclick="goToStep(3)" class="btn-primary w-2/3">Avançar</button>
-                </div>
-            </section>
-
-            <section id="step-3" class="step-view hidden-view">
-                <h2 class="text-xl font-bold mb-1">Condição Climática</h2>
-                <p class="text-sm text-textMuted mb-6">Crucial para controle de aditivos.</p>
-
-                <button class="btn-primary w-full mb-6">
-                    <span class="material-symbols-outlined">satellite_alt</span>
-                    Detectar Automaticamente (GPS)
-                </button>
-
-                <div class="grid grid-cols-3 gap-3 mb-6">
-                    <button class="bg-card border border-[#334155] text-textMuted py-4 rounded-lg flex flex-col items-center gap-1">
-                        <span class="material-symbols-outlined">light_mode</span> Sol
-                    </button>
-                    <button class="bg-[#334155] border-2 border-primary text-white py-4 rounded-lg flex flex-col items-center gap-1">
-                        <span class="material-symbols-outlined">cloud</span> Nublado
-                    </button>
-                    <button class="bg-card border border-[#334155] text-textMuted py-4 rounded-lg flex flex-col items-center gap-1">
-                        <span class="material-symbols-outlined">rainy</span> Chuva
-                    </button>
-                </div>
-
-                <div class="flex gap-3 mt-8">
-                    <button onclick="goToStep(2)" class="btn-secondary w-1/3">Voltar</button>
-                    <button onclick="goToStep(4)" class="btn-primary w-2/3">Avançar</button>
-                </div>
-            </section>
-
-            <section id="step-4" class="step-view hidden-view">
-                <h2 class="text-xl font-bold mb-1">Efetivo de Campo</h2>
-                <p class="text-sm text-textMuted mb-6">Registre os profissionais ativos hoje.</p>
-
-                <div class="flex gap-2 mb-6">
-                    <input type="text" placeholder="Nome do operário" class="input-dark w-[50%]">
-                    <select class="input-dark w-[35%]">
-                        <option>Pedreiro</option>
-                        <option>Servente</option>
-                        <option>Mestre</option>
-                    </select>
-                    <button class="bg-primary text-bgMain w-[15%] h-12 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined font-bold">add</span>
-                    </button>
-                </div>
-
-                <div class="space-y-2 mb-8">
-                    <div class="bg-card border border-[#334155] p-3 rounded-lg flex justify-between items-center">
-                        <div>
-                            <p class="font-bold">Carlos Mestre</p>
-                            <p class="text-xs text-textMuted">Mestre de Obras</p>
-                        </div>
-                        <button class="text-error bg-error/10 p-2 rounded"><span class="material-symbols-outlined text-sm">delete</span></button>
-                    </div>
-                    <div class="bg-card border border-[#334155] p-3 rounded-lg flex justify-between items-center">
-                        <div>
-                            <p class="font-bold">João Silva</p>
-                            <p class="text-xs text-textMuted">Pedreiro</p>
-                        </div>
-                        <button class="text-error bg-error/10 p-2 rounded"><span class="material-symbols-outlined text-sm">delete</span></button>
-                    </div>
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="goToStep(3)" class="btn-secondary w-1/3">Voltar</button>
-                    <button onclick="goToStep(5)" class="btn-primary w-2/3">Avançar</button>
-                </div>
-            </section>
-
-            <section id="step-5" class="step-view hidden-view">
-                <h2 class="text-xl font-bold mb-1">Avanço e Medição</h2>
-                <p class="text-sm text-textMuted mb-6">Qual o status físico gerado?</p>
-
-                <div class="bg-card border border-[#334155] p-4 rounded-lg mb-6">
-                    <label class="text-xs font-bold text-textMuted uppercase mb-2 block">Medição Executada (Opcional)</label>
-                    <input type="text" placeholder="Ex: 45 m³ de concreto" class="input-dark">
-                </div>
-
-                <div class="bg-card border border-[#334155] p-6 rounded-lg mb-8 text-center">
-                    <label class="text-xs font-bold text-textMuted uppercase mb-4 block">Avanço Global da Obra</label>
-                    <span class="text-5xl font-bold text-primary block mb-6">65%</span>
-                    <input type="range" min="0" max="100" value="65">
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="goToStep(4)" class="btn-secondary w-1/3">Voltar</button>
-                    <button onclick="goToStep(6)" class="btn-primary w-2/3">Avançar</button>
-                </div>
-            </section>
-
-            <section id="step-6" class="step-view hidden-view">
-                <h2 class="text-xl font-bold mb-1">Revisão Final</h2>
-                <p class="text-sm text-textMuted mb-6">Valide os dados antes de assinar.</p>
-
-                <div class="bg-card border border-[#334155] rounded-lg p-4 mb-8">
-                    <div class="flex justify-between border-b border-[#334155] pb-3 mb-3">
-                        <span class="text-textMuted text-sm">Obra</span>
-                        <span class="font-bold text-right" id="resumo-obra">UBS Canelas</span>
-                    </div>
-                    <div class="flex justify-between border-b border-[#334155] pb-3 mb-3">
-                        <span class="text-textMuted text-sm">Atividade</span>
-                        <span class="font-bold text-right">Concretagem</span>
-                    </div>
-                    <div class="flex justify-between border-b border-[#334155] pb-3 mb-3">
-                        <span class="text-textMuted text-sm">Clima</span>
-                        <span class="font-bold text-right">Nublado</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-textMuted text-sm">Avanço Final</span>
-                        <span class="font-bold text-primary text-xl">65%</span>
-                    </div>
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="goToStep(5)" class="btn-secondary w-1/3">Voltar</button>
-                    <button id="btn-sync" onclick="simulateSync()" class="btn-primary w-2/3">
-                        <span class="material-symbols-outlined">cloud_upload</span> Sincronizar
-                    </button>
-                </div>
-            </section>
-
+  <div class="section-title">Indicadores Quantitativos</div>
+  
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-body">
+        <div class="score-flex">
+          <div class="score-info">
+            <h4>Organização e Infraestrutura</h4>
+            <p>Logística, fluxo e funcionamento geral</p>
+          </div>
+          <div class="score-badge">4,22</div>
         </div>
-    </main>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-name">Nota 5</div>
+            <div class="bar-track"><div class="bar-fill" style="width: 50%; background: var(--verde-sus);"></div></div>
+            <div class="bar-num">25</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-name">Nota 4</div>
+            <div class="bar-track"><div class="bar-fill" style="width: 28%; background: var(--azul-medio);"></div></div>
+            <div class="bar-num">14</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-name">≤ 3</div>
+            <div class="bar-track"><div class="bar-fill" style="width: 22%; background: var(--amarelo-brasil);"></div></div>
+            <div class="bar-num">11</div>
+          </div>
+        </div>
+        <p style="font-size: 11px; font-weight: 600; color: var(--cinza-medio); margin-top: 16px; text-align: center;">LEITURA: Forte aprovação com poucos pontos críticos.</p>
+      </div>
+    </div>
 
-    <nav class="fixed bottom-0 w-full bg-card border-t border-[#334155] flex justify-around items-center py-2 z-40">
-        <button onclick="goHome()" class="flex flex-col items-center p-2 text-primary">
-            <span class="material-symbols-outlined">home</span>
-            <span class="text-[10px] font-bold mt-1">Painel</span>
-        </button>
-        <button class="flex flex-col items-center p-2 text-textMuted hover:text-textMain">
-            <span class="material-symbols-outlined">description</span>
-            <span class="text-[10px] font-bold mt-1">Relatórios</span>
-        </button>
-        <button class="flex flex-col items-center p-2 text-textMuted hover:text-textMain">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="text-[10px] font-bold mt-1">Ajustes</span>
-        </button>
-    </nav>
+    <div class="card">
+      <div class="card-body">
+        <div class="score-flex">
+          <div class="score-info">
+            <h4>Acessibilidade e Inclusão</h4>
+            <p>Estrutura física, Libras e acolhimento</p>
+          </div>
+          <div class="score-badge" style="color: #9A6500; background: #FEF8E7; border-color: #F5C800;">3,68</div>
+        </div>
+        <div class="progress-wrap">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; margin-bottom: 6px;">
+            <span style="color: var(--verde-sus);">Altas (4-5): 31 res.</span>
+            <span style="color: #9A6500;">Baixas (1-3): 19 res.</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-segment" style="width: 62%; background: var(--verde-sus);"></div>
+            <div class="progress-segment" style="width: 38%; background: var(--amarelo-brasil);"></div>
+          </div>
+        </div>
+        <p style="font-size: 11px; font-weight: 600; color: var(--cinza-medio); margin-top: 24px; text-align: center;">LEITURA: Distribuição dispersa. Principal ponto de atenção estrutural.</p>
+      </div>
+    </div>
 
-    <script>
-        // Lógica simples para demonstração visual das telas
-        function startFlow(obraName) {
-            document.getElementById('view-home').classList.add('hidden-view');
-            document.getElementById('wizard-container').classList.remove('hidden-view');
-            document.getElementById('header-subtitle').innerText = obraName;
-            document.getElementById('resumo-obra').innerText = obraName;
-            document.getElementById('btn-back-global').classList.remove('hidden');
-            goToStep(1);
-        }
+    <div class="card">
+      <div class="card-body" style="text-align: center;">
+        <h4 style="font-size: 13px; font-weight: 800; color: var(--cinza-texto); text-transform: uppercase;">Clareza das Informações</h4>
+        <div style="font-size: 40px; font-weight: 900; color: var(--azul-sus); margin: 10px 0;">4,18</div>
+        <p style="font-size: 12px; color: var(--cinza-medio); font-weight: 500;">Comunicação institucional eficaz e baixo ruído informacional pré-evento.</p>
+      </div>
+    </div>
 
-        function goHome() {
-            document.getElementById('wizard-container').classList.add('hidden-view');
-            document.getElementById('view-home').classList.remove('hidden-view');
-            document.getElementById('header-subtitle').innerText = "Sistema Operacional";
-            document.getElementById('btn-back-global').classList.add('hidden');
-        }
+    <div class="card">
+      <div class="card-body" style="text-align: center;">
+        <h4 style="font-size: 13px; font-weight: 800; color: var(--cinza-texto); text-transform: uppercase;">Qualidade Metodológica</h4>
+        <div style="font-size: 40px; font-weight: 900; color: var(--azul-medio); margin: 10px 0;">4,04</div>
+        <p style="font-size: 12px; color: var(--cinza-medio); font-weight: 500;">Conteúdo consistente, havendo espaço para maior aprofundamento prático.</p>
+      </div>
+    </div>
+  </div>
 
-        function goToStep(step) {
-            // Esconde todos
-            document.querySelectorAll('.step-view').forEach(el => el.classList.add('hidden-view'));
-            // Mostra atual
-            document.getElementById(`step-${step}`).classList.remove('hidden-view');
-            window.scrollTo(0,0);
+  <div class="section-title">Análise Qualitativa</div>
+  
+  <div class="grid-2">
+    <div class="card" style="border-top: 4px solid var(--verde-sus);">
+      <div class="card-body">
+        <h3 style="font-size: 14px; font-weight: 800; color: var(--verde-sus); text-transform: uppercase; margin-bottom: 16px;">Pontos Positivos (Padrões)</h3>
+        <ul class="highlight-list">
+          <li><strong>Ambiente democrático:</strong> Respeito, abertura à fala e participação efetiva da comunidade.</li>
+          <li><strong>Organização estruturada:</strong> Logística funcional e fluxos bem definidos.</li>
+          <li><strong>Metodologia participativa:</strong> Grupos de trabalho produtivos e discussões ativas.</li>
+          <li><strong>Relevância temática:</strong> Eixos percebidos como altamente conectados à realidade local do SUS.</li>
+        </ul>
+      </div>
+    </div>
 
-            // Atualiza Top Nav
-            for(let i=1; i<=6; i++) {
-                let circle = document.getElementById(`nav-${i}`);
-                let line = document.getElementById(`line-${i}`);
-                
-                circle.classList.remove('active', 'completed');
-                if(line) line.classList.remove('completed');
+    <div class="card" style="border-top: 4px solid var(--amarelo-brasil);">
+      <div class="card-body">
+        <h3 style="font-size: 14px; font-weight: 800; color: #9A6500; text-transform: uppercase; margin-bottom: 16px;">Fragilidades (Gargalos)</h3>
+        <ul class="highlight-list neg">
+          <li><strong>Acessibilidade não homogênea:</strong> Falhas em Libras, estrutura física e acolhimento específico.</li>
+          <li><strong>Profundidade do debate:</strong> Tempo insuficiente e discussões superficiais em alguns grupos.</li>
+          <li><strong>Desigualdade na condução:</strong> A experiência variou consideravelmente conforme o facilitador do grupo.</li>
+          <li><strong>Comunicação operacional:</strong> Casos residuais de dúvidas sobre regras e dinâmica das propostas.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
-                if(i < step) {
-                    circle.classList.add('completed');
-                    circle.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span>';
-                    if(line) line.classList.add('completed');
-                } else if(i === step) {
-                    circle.classList.add('active');
-                    circle.innerHTML = i;
-                } else {
-                    circle.innerHTML = i;
-                }
-            }
-        }
+  <div class="section-title">Insights Estratégicos</div>
+  
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-top-bar"></div>
+      <div class="card-body" style="padding: 20px;">
+        <span class="insight-tag" style="background: #E8F4FD; color: var(--azul-sus);">Insight 01</span>
+        <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">Evento Legitimado</h4>
+        <p style="font-size: 12px; color: var(--cinza-medio);">A alta percepção de espaço democrático indica fortalecimento do controle social real e construção de confiança institucional.</p>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-top-bar"></div>
+      <div class="card-body" style="padding: 20px;">
+        <span class="insight-tag" style="background: #E8F4FD; color: var(--azul-sus);">Insight 02</span>
+        <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">Qualidade da Experiência</h4>
+        <p style="font-size: 12px; color: var(--cinza-medio);">A base logística está resolvida. O próximo nível exige profundidade de debate e padronização da qualidade entre grupos.</p>
+      </div>
+    </div>
 
-        function simulateSync() {
-            const btn = document.getElementById('btn-sync');
-            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processando...';
-            btn.disabled = true;
-            
-            setTimeout(() => {
-                btn.classList.remove('bg-primary');
-                btn.classList.add('bg-success');
-                btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Enviado!';
-                setTimeout(() => goHome(), 1500);
-            }, 1500);
-        }
-    </script>
+    <div class="card">
+      <div class="card-top-bar"></div>
+      <div class="card-body" style="padding: 20px;">
+        <span class="insight-tag" style="background: #FEF8E7; color: #9A6500;">Insight 03</span>
+        <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">Risco: Acessibilidade</h4>
+        <p style="font-size: 12px; color: var(--cinza-medio);">Acessibilidade inconsistente é o maior risco institucional. Se não corrigida, afeta diretamente o princípio de equidade do SUS.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top-bar"></div>
+      <div class="card-body" style="padding: 20px;">
+        <span class="insight-tag" style="background: #FEF8E7; color: #9A6500;">Insight 04</span>
+        <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px;">Governança de Grupos</h4>
+        <p style="font-size: 12px; color: var(--cinza-medio);">A variabilidade da experiência entre grupos indica ausência de protocolos padronizados e capacitação homogênea de mediadores.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Recomendações e Plano de Ação</div>
+  
+  <div class="kanban-board">
+    <div class="kanban-col">
+      <div class="kanban-header">Curto Prazo (Imediato)</div>
+      <div class="kanban-item">Revisar acessibilidade (criar checklist obrigatório)</div>
+      <div class="kanban-item">Ajustar cronograma e tempo de debate por eixo temático</div>
+      <div class="kanban-item">Criar roteiro mínimo padrão para os facilitadores</div>
+    </div>
+    
+    <div class="kanban-col">
+      <div class="kanban-header">Médio Prazo (Próxima Edição)</div>
+      <div class="kanban-item med">Capacitação formal de mediadores e relatores</div>
+      <div class="kanban-item med">Padronização metodológica estrita dos grupos de trabalho</div>
+      <div class="kanban-item med">Elaboração de Manual do Participante (versão simplificada)</div>
+    </div>
+
+    <div class="kanban-col">
+      <div class="kanban-header">Longo Prazo (Estrutural)</div>
+      <div class="kanban-item long">Desenvolver Modelo Institucional Replicável (Framework)</div>
+      <div class="kanban-item long">Criar sistema de indicadores de qualidade contínuo por eixo</div>
+      <div class="kanban-item long">Implementar sistema de monitoramento da experiência</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Relatório de Análise de Dados · 11ª Conferência Municipal de Saúde de Montes Claros<br>
+  Gerado pela Secretaria Executiva do Conselho Municipal de Saúde
+</footer>
+
 </body>
 </html>
