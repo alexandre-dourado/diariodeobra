@@ -1,122 +1,228 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Diário de Obra — Registro diário de obras públicas">
-  <meta name="theme-color" content="#F5C800">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Diário Obra">
-  <link rel="manifest" href="manifest.json">
-  <title>Diário de Obra</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#002FA7">
+    <title>SITE LOG PRO — Arquitetura Digital</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Public+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,700,0,0" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        klein: '#002FA7',
+                        bauhausYellow: '#FFD600',
+                        ink: '#121212',
+                        paper: '#F7F7F7',
+                    },
+                    fontFamily: {
+                        headline: ['Space Grotesk', 'sans-serif'],
+                        body: ['Public Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .hidden-view { display: none !important; }
+        .clay-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.05), -4px -4px 10px rgba(255, 255, 255, 0.8);
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .clay-card.selected {
+            border-color: #002FA7;
+            background: #f0f4ff;
+        }
+        .clay-btn {
+            background: #002FA7;
+            box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.2), inset 2px 2px 8px rgba(255, 255, 255, 0.3);
+        }
+        .clay-btn:active {
+            transform: scale(0.98);
+            box-shadow: inset 4px 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        input[type="range"] { accent-color: #002FA7; }
+        .glass-nav {
+            background: rgba(247, 247, 247, 0.8);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body>
 
-<!-- ================== LOADING ================== -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="spinner"></div>
-  <div class="loading-text" id="loading-text">Carregando...</div>
-</div>
+<body class="bg-paper text-ink font-body min-h-screen pb-24">
 
-<!-- ================== AVISO ================== -->
-<div class="toast" id="toast"></div>
-
-<!-- ======================================================
-     TELA INICIAL — LISTA DE OBRAS
-     ====================================================== -->
-<div id="screen-home">
-
-  <!-- CABEÇALHO -->
-  <div class="top-bar">
-    <div class="logo">DIÁRIO <span>DE</span> OBRA</div>
-    <div class="badge-online online" id="online-badge">CONECTADO</div>
-  </div>
-
-  <!-- CONTADORES -->
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div class="stat-label">OBRAS ATIVAS</div>
-      <div class="stat-value" id="stat-obras">00</div>
+    <div id="loading-overlay" class="fixed inset-0 z-[100] bg-ink/60 flex flex-col items-center justify-center text-white hidden">
+        <div class="w-12 h-12 border-4 border-bauhausYellow border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="font-headline font-bold uppercase tracking-widest text-sm" id="loading-text">Sincronizando...</p>
     </div>
-    <div class="stat-box highlight">
-      <div class="stat-label">ENVIOS PENDENTES</div>
-      <div class="stat-value" id="stat-pending">00</div>
-    </div>
-  </div>
 
-  <!-- BUSCA -->
-  <div class="search-area">
-    <input type="search" class="search-input" id="search-input"
-           placeholder="🔍  BUSCAR OBRA...">
-  </div>
+    <header class="fixed top-0 w-full z-40 glass-nav px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="voltarParaHome()">
+            <span class="material-symbols-outlined font-black">construction</span>
+            <h1 class="font-headline text-xl font-black tracking-tighter uppercase">SITE LOG PRO</h1>
+        </div>
+        <div id="connection-status" class="w-3 h-3 rounded-full bg-green-500"></div>
+    </header>
 
-  <!-- LISTA DE OBRAS -->
-  <div class="obras-list pb-btn" id="obras-list">
-    <div class="empty-state">
-      <div class="icon">⏳</div>
-      <div class="msg">Carregando obras...</div>
-    </div>
-  </div>
+    <main class="pt-24 px-6 max-w-md mx-auto">
 
-  <!-- BOTÃO PRINCIPAL -->
-  <button class="btn-registrar-fixed" id="btn-registrar-home">
-    📋 REGISTRAR O DIA +
-  </button>
+        <section id="view-home" class="view-section">
+            <div class="mb-8">
+                <h2 class="font-headline text-4xl font-black uppercase leading-none mb-2">Painel</h2>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Selecione a obra para registrar</p>
+            </div>
+            <div id="lista-obras" class="flex flex-col gap-4">
+                <div class="p-8 text-center animate-pulse font-bold text-gray-400">CARREGANDO...</div>
+            </div>
+        </section>
 
-</div><!-- /screen-home -->
+        <section id="view-step1" class="view-section hidden-view">
+            <div class="mb-6">
+                <span class="text-klein font-black font-headline">01/06 — FOTO</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter">CAPTURA</h2>
+            </div>
+            <div class="clay-card aspect-square flex flex-col items-center justify-center relative overflow-hidden mb-8 bg-gray-100 border-dashed border-2 border-gray-300">
+                <img id="preview-img" class="absolute w-full h-full object-cover hidden">
+                <span id="cam-icon" class="material-symbols-outlined text-7xl text-gray-300">photo_camera</span>
+                <input type="file" id="camera-input" accept="image/*" capture="environment" class="absolute inset-0 opacity-0 cursor-pointer">
+            </div>
+            <button onclick="proximoPasso()" id="btn-next-1" class="clay-btn w-full py-5 text-white font-headline font-black text-xl uppercase tracking-widest rounded-2xl hidden">AVANÇAR</button>
+        </section>
 
+        <section id="view-step2" class="view-section hidden-view">
+            <div class="mb-6">
+                <span class="text-klein font-black font-headline">02/06 — SERVIÇO</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter">ATIVIDADE</h2>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-8" id="grid-atividades">
+                </div>
+            <button onclick="proximoPasso()" class="clay-btn w-full py-5 text-white font-headline font-black text-xl uppercase tracking-widest rounded-2xl">AVANÇAR</button>
+        </section>
 
-<!-- ======================================================
-     FLUXO DE REGISTRO — PASSOS
-     ====================================================== -->
-<div id="screen-steps" style="display:none; padding-bottom:80px">
+        <section id="view-step3" class="view-section hidden-view">
+            <div class="mb-6">
+                <span class="text-klein font-black font-headline">03/06 — AMBIENTE</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter">CLIMA</h2>
+            </div>
+            <button id="btn-clima-auto" onclick="buscarClimaAutomatico()" class="w-full bg-white text-klein font-black uppercase text-sm py-4 mb-6 rounded-xl border-2 border-klein flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#002FA7]">
+                <span class="material-symbols-outlined">satellite_alt</span> GPS DETECTAR CLIMA
+            </button>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="selecionarClima('sol', this)" data-clima="sol" class="clay-card btn-clima p-4 flex flex-col items-center gap-2">
+                    <span class="material-symbols-outlined text-yellow-500">light_mode</span>
+                    <span class="text-[10px] font-black uppercase">Sol</span>
+                </button>
+                <button onclick="selecionarClima('nublado', this)" data-clima="nublado" class="clay-card btn-clima p-4 flex flex-col items-center gap-2">
+                    <span class="material-symbols-outlined text-gray-400">cloud</span>
+                    <span class="text-[10px] font-black uppercase">Nublado</span>
+                </button>
+                <button onclick="selecionarClima('chuva', this)" data-clima="chuva" class="clay-card btn-clima p-4 flex flex-col items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500">rainy</span>
+                    <span class="text-[10px] font-black uppercase">Chuva</span>
+                </button>
+            </div>
+            <textarea id="input-obs-clima" placeholder="Observações do clima..." class="w-full p-4 clay-card mb-8 outline-none focus:border-klein text-sm font-bold h-24"></textarea>
+            <button onclick="proximoPasso()" class="clay-btn w-full py-5 text-white font-headline font-black text-xl uppercase tracking-widest rounded-2xl">AVANÇAR</button>
+        </section>
 
-  <!-- CABEÇALHO -->
-  <div class="top-bar">
-    <button class="btn-back" onclick="voltarPasso()">←</button>
-    <div class="logo">DIÁRIO <span>DE</span> OBRA</div>
-  </div>
+        <section id="view-step4" class="view-section hidden-view">
+            <div class="mb-6">
+                <span class="text-klein font-black font-headline">04/06 — PESSOAL</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter">EQUIPE</h2>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="add-nome" placeholder="Nome" class="w-2/3 p-3 clay-card text-sm font-bold outline-none">
+                <input type="text" id="add-funcao" placeholder="Função" class="w-1/3 p-3 clay-card text-sm font-bold outline-none">
+                <button onclick="adicionarTrabalhador()" class="bg-ink text-white p-3 rounded-xl"><span class="material-symbols-outlined">add</span></button>
+            </div>
+            <ul id="lista-equipe" class="space-y-2 mb-8 max-h-60 overflow-y-auto">
+                </ul>
+            <button onclick="proximoPasso()" class="clay-btn w-full py-5 text-white font-headline font-black text-xl uppercase tracking-widest rounded-2xl">AVANÇAR</button>
+        </section>
 
-  <!-- BANNER DA OBRA SELECIONADA -->
-  <div class="obra-banner">
-    <div class="obra-banner-icon">🏗️</div>
-    <div class="obra-banner-info">
-      <div class="obra-banner-name" id="obra-banner-name">Obra</div>
-      <div class="obra-banner-id" id="obra-banner-id">—</div>
-    </div>
-  </div>
+        <section id="view-step5" class="view-section hidden-view">
+            <div class="mb-6">
+                <span class="text-klein font-black font-headline">05/06 — STATUS</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter">EVOLUÇÃO</h2>
+            </div>
+            <div class="mb-8">
+                <label class="font-black uppercase text-[10px] text-gray-400 block mb-2">Medição Diária (m², m³, un)</label>
+                <input type="text" id="input-medicao" placeholder="Ex: 45m²" class="w-full p-5 clay-card text-2xl font-black outline-none border-l-8 border-bauhausYellow">
+            </div>
+            <div class="mb-8">
+                <div class="flex justify-between mb-2">
+                    <label class="font-black uppercase text-[10px] text-gray-400">Execução Global da Obra</label>
+                    <span id="label-progresso" class="font-headline font-black text-klein">0%</span>
+                </div>
+                <input type="range" id="range-progresso" min="0" max="100" value="0" class="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer" oninput="atualizarLabelProgresso(this.value)">
+            </div>
+            <button onclick="gerarResumoFinal(); proximoPasso();" class="clay-btn w-full py-5 text-white font-headline font-black text-xl uppercase tracking-widest rounded-2xl">VER RESUMO</button>
+        </section>
 
-  <!-- PROGRESSO -->
-  <div class="steps-header">
-    <div class="step-counter">
-      <div class="step-label" id="step-label">ETAPA 1 DE 5</div>
-      <div class="step-pct" id="step-pct">20%</div>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill" style="width:20%"></div>
-    </div>
-    <div class="step-title" id="step-title">ETAPA 1: FOTO DA OBRA<span></span></div>
-  </div>
+        <section id="view-step6" class="view-section hidden-view">
+            <div class="mb-6">
+                <span class="text-klein font-black font-headline">06/06 — REVISÃO</span>
+                <h2 class="text-4xl font-black uppercase tracking-tighter">RESUMO</h2>
+            </div>
+            <div class="clay-card p-6 bg-white border-l-8 border-ink space-y-4 mb-8">
+                <div class="border-b pb-2">
+                    <p class="text-[10px] font-black uppercase text-gray-400">Obra</p>
+                    <p id="res-obra" class="font-headline font-black uppercase">-</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-gray-400">Atividade</p>
+                        <p id="res-atividade" class="font-bold uppercase text-xs">-</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-gray-400">Clima</p>
+                        <p id="res-clima" class="font-bold uppercase text-xs">-</p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black uppercase text-gray-400">Medição / Progresso</p>
+                    <p id="res-status" class="font-headline font-black text-klein">-</p>
+                </div>
+                <div id="res-foto-container" class="w-full h-32 overflow-hidden rounded-lg bg-gray-100">
+                    <img id="res-foto" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <button id="btn-sync" onclick="sincronizarDados()" class="clay-btn w-full py-6 text-white font-headline font-black text-2xl uppercase tracking-tighter rounded-2xl flex items-center justify-center gap-3">
+                <span class="material-symbols-outlined text-3xl">cloud_upload</span> SINCRONIZAR
+            </button>
+        </section>
 
-  <!-- CONTEÚDO DO PASSO -->
-  <div class="step-content" id="step-body"></div>
+    </main>
 
-  <!-- BOTÃO AVANÇAR -->
-  <div style="padding: 0 16px 16px">
-    <button class="btn-primary" id="btn-next" onclick="avancar()" disabled>
-      CONTINUAR →
-    </button>
-  </div>
+    <nav class="fixed bottom-0 w-full glass-nav flex justify-around items-center py-4 pb-8 z-40">
+        <button onclick="voltarParaHome()" class="flex flex-col items-center gap-1 text-gray-400">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[9px] font-black uppercase">Home</span>
+        </button>
+        <button onclick="proximoPasso()" class="flex flex-col items-center gap-1 text-klein">
+            <span class="material-symbols-outlined text-4xl">add_circle</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-gray-400">
+            <span class="material-symbols-outlined">history</span>
+            <span class="text-[9px] font-black uppercase">Logs</span>
+        </button>
+    </nav>
 
-</div><!-- /screen-steps -->
-
-<!-- Scripts -->
-<script src="storage.js"></script>
-<script src="api.js"></script>
-<script src="app.js"></script>
-
+    <script src="storage.js"></script>
+    <script src="api.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

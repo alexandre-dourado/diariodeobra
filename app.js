@@ -636,3 +636,59 @@ window.voltarHome         = voltarHome;
 window.atualizarBotaoNext = atualizarBotaoNext;
 window.state              = state;
 window.showToast          = mostrarAviso; // alias
+
+// Função para buscar o clima real da obra automaticamente
+async function buscarClimaAutomatico() {
+    // Coordenadas padrão (Montes Claros, MG) - Usadas como fallback
+    let lat = -16.7350;
+    let lon = -43.8616;
+
+    // Tenta pegar a localização exata do celular do engenheiro na hora (opcional)
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(position => {
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
+        }, () => console.log("Usando coordenadas padrão de Montes Claros."));
+    }
+
+    try {
+        const btnClima = document.getElementById('btn-clima-auto');
+        if(btnClima) btnClima.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Buscando...';
+
+        // Chamada à API Gratuita (Open-Meteo)
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+
+        const climaInfo = dados.current_weather;
+        const codigoWMO = climaInfo.weathercode;
+        const temperatura = climaInfo.temperature;
+
+        // Tradução do Código WMO (Organização Meteorológica Mundial) para o nosso padrão
+        let condicaoApp = "sol"; // Padrão para códigos 0, 1, 2
+        
+        if (codigoWMO === 3) condicaoApp = "nublado";
+        if (codigoWMO >= 51 && codigoWMO <= 67) condicaoApp = "chuva"; // Chuvisco a chuva forte
+        if (codigoWMO >= 80) condicaoApp = "chuva"; // Pancadas de chuva ou tempestade
+
+        // Atualiza o estado da aplicação
+        appState.teve_problema = condicaoApp === "chuva"; // Exemplo: se chover, já marca como possível problema
+        
+        // Define a observação com um selo de auditoria
+        const observacaoAutomatica = `[Auto-Detect: ${temperatura}°C | Cód: ${codigoWMO}]`;
+        
+        // Dispara a função visual que clica no botão correto na interface
+        const botaoUI = document.querySelector(`button[data-clima="${condicaoApp}"]`);
+        if (botaoUI) selectProblem(appState.teve_problema, botaoUI);
+
+        // Preenche automaticamente o campo de observação (se você tiver um)
+        const inputObs = document.getElementById('input-obs-clima');
+        if (inputObs) inputObs.value = observacaoAutomatica;
+
+        if(btnClima) btnClima.innerHTML = '<span class="material-symbols-outlined">cloud_sync</span> Clima Atualizado!';
+
+    } catch (error) {
+        console.error("Erro ao buscar clima automático:", error);
+        alert("Não foi possível puxar o clima automático. Insira manualmente.");
+    }
+}
